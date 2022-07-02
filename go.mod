@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/apex/log v1.9.0
-	github.com/charmbracelet/bubbles v0.11.0
+	github.com/charmbracelet/bubbles v0.12.0
 	github.com/charmbracelet/bubbletea v0.21.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/knipferrc/teacup v0.2.0
