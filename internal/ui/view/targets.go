@@ -7,28 +7,29 @@ package view
 import (
 	"log"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
 )
 
-type Root struct {
+type Targets struct {
 	*Base
 }
 
-func NewRoot(app types.App) *Root {
-	return &Root{
+func NewTargets(app types.App) *Targets {
+	return &Targets{
 		Base: &Base{
 			app: app,
-			is:  types.ViewRoot,
+			is:  types.ViewTargets,
 		},
 	}
 }
 
-func (v *Root) Init() tea.Cmd { return nil }
+func (v *Targets) Init() tea.Cmd { return nil }
 
-func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("Root.Update: %#v", msg)
+func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	log.Printf("Targets.Update: %#v", msg)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height
@@ -38,17 +39,22 @@ func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseLeft, tea.MouseRight:
 			v.app.SetFocused(v.is)
 		}
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, types.KeyCancel):
+			v.app.Back(true)
+			return v, nil
+		}
 	}
 	return v, nil
 }
 
-func (v *Root) View() string {
+func (v *Targets) View() string {
 	s := lipgloss.NewStyle().
-		Width(v.width-2). // 2 for border
-		Height(v.height-2).
+		Width(v.width - 2). // -2 for border
+		Height(v.height - 2).
 		MaxHeight(v.height).
 		MaxWidth(v.width).
-		Padding(0, 1).
 		Background(types.Theme.Bg).
 		Border(lipgloss.RoundedBorder()).
 		BorderBackground(types.Theme.ViewBorderBg).
@@ -58,5 +64,5 @@ func (v *Root) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return s.Render("// ROOT")
+	return s.Render("// TARGETS")
 }

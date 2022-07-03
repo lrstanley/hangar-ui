@@ -95,8 +95,13 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height
 		v.width = msg.Width
-		v.model.Height = msg.Height - v.model.Style.GetVerticalFrameSize()
-		v.model.Width = msg.Width - v.model.Style.GetHorizontalFrameSize()
+		v.model.Height = msg.Height - v.model.Style.GetVerticalFrameSize() - 2 // 2 for border
+		v.model.Width = msg.Width - v.model.Style.GetHorizontalFrameSize() - 2 // 2 for border
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseLeft, tea.MouseRight:
+			v.app.SetFocused(v.is)
+		}
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, types.KeyCancel):
@@ -114,11 +119,21 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (v *Help) View() string {
 	out := v.model.View()
+
 	s := lipgloss.NewStyle().
-		Height(v.height).
-		Width(v.width).
+		Width(v.width-2). // 2 for border
+		Height(v.height-2).
+		MaxHeight(v.height).
+		MaxWidth(v.width).
 		Padding(0, 1).
-		Background(types.Theme.Bg)
+		Background(types.Theme.Bg).
+		Border(lipgloss.RoundedBorder()).
+		BorderBackground(types.Theme.ViewBorderBg).
+		BorderForeground(types.Theme.ViewBorderInactiveFg)
+
+	if v.Focused() {
+		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
+	}
 
 	return s.Render(out)
 }

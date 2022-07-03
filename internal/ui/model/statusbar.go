@@ -46,7 +46,10 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 			is:     types.ViewStatusBar,
 			Height: 1,
 		},
-		keys: keys,
+		keys:   keys,
+		Target: "target",
+		URL:    "concourse.example.com",
+		Logo:   "hangar-ui",
 	}
 
 	m.baseStyle = lipgloss.NewStyle().
@@ -84,15 +87,24 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseLeft:
+			if msg.X <= (x.W(m.Target) + 2) {
+				log.Println("triggering target")
+				m.app.SetActive(types.ViewTargets, true)
+				return m, nil
+			}
+		}
 	}
 
 	return m, nil
 }
 
 func (m *StatusBar) View() string {
-	target := m.targetStyle.Render("target")
-	url := m.urlStyle.Render("concourse.example.com")
-	logo := m.logoStyle.Render("hangar-ui")
+	target := m.targetStyle.Render(m.Target)
+	url := m.urlStyle.Render(m.URL)
+	logo := m.logoStyle.Render(m.Logo)
 
 	help := ""
 	bindings := m.keys.ShortHelp()

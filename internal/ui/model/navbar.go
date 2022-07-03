@@ -1,0 +1,119 @@
+// Copyright (c) Liam Stanley <me@liamstanley.io>. All rights reserved. Use
+// of this source code is governed by the MIT license that can be found in
+// the LICENSE file.
+
+package model
+
+import (
+	"log"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/x"
+)
+
+const (
+	navBarPadding    = 1
+	navBarItemMargin = 1
+)
+
+type NavBar struct {
+	*Base
+
+	views []types.Viewable
+
+	activeStyle   lipgloss.Style
+	inactiveStyle lipgloss.Style
+}
+
+func NewNavBar(app types.App, views []types.Viewable) *NavBar {
+	m := &NavBar{
+		Base: &Base{
+			app:    app,
+			is:     types.ViewNavigation,
+			Height: 1,
+		},
+		views: views,
+	}
+
+	m.activeStyle = lipgloss.NewStyle().
+		Foreground(types.Theme.NavActiveFg).
+		Background(types.Theme.NavActiveBg).
+		Padding(0, 1).
+		MarginRight(navBarItemMargin)
+
+	m.inactiveStyle = lipgloss.NewStyle().
+		Foreground(types.Theme.NavInactiveFg).
+		Background(types.Theme.NavInactiveBg).
+		Padding(0, 1).
+		MarginRight(navBarItemMargin)
+
+	return m
+}
+
+func (m *NavBar) Init() tea.Cmd {
+	return nil
+}
+
+func (m *NavBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	log.Printf("NavBar.Update: %#v", msg)
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.Width = msg.Width
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseLeft, tea.MouseRight:
+			msg.X -= navBarPadding // Account for the padding.
+
+			w := 0
+
+			for _, v := range m.views[:len(m.views)-1] {
+				w += len(string(v)) + navBarItemMargin + (2 * navBarPadding)
+
+				if msg.X < w {
+					m.app.SetActive(v, true)
+					return m, nil
+				}
+			}
+
+			lastW := m.Width - x.W(string(m.views[len(m.views)-1])) - (4 * navBarPadding)
+			if msg.X >= lastW {
+				m.app.SetActive(m.views[len(m.views)-1], true)
+				return m, nil
+			}
+		}
+	}
+
+	return m, nil
+}
+
+func (m *NavBar) View() string {
+	m.buf.Reset()
+	s := lipgloss.NewStyle().
+		Width(m.Width).
+		MaxWidth(m.Width).
+		Padding(0, navBarPadding)
+
+	active := m.app.Active()
+	var style lipgloss.Style
+
+	for i, v := range m.views {
+		if v == active {
+			style = m.activeStyle.Copy()
+		} else {
+			style = m.inactiveStyle.Copy()
+		}
+
+		if i+1 == len(m.views) {
+			break
+		}
+
+		m.buf.WriteString(style.Render(string(v)))
+	}
+
+	last := style.Margin(0).Render(string(m.views[len(m.views)-1]))
+	spaceLeft := m.Width - x.W(m.buf.String()) - (2 * navBarPadding)
+
+	return s.Render(m.buf.String() + x.PlaceX(spaceLeft, x.Right, last))
+}

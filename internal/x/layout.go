@@ -48,6 +48,20 @@ var (
 	//
 	Y = lipgloss.JoinVertical
 
+	// PlaceX places a string or text block horizontally in an unstyled block of
+	// a given width. If the given width is shorter than the max width of the
+	// string (measured by it's longest line) this will be a noöp.
+	PlaceX = lipgloss.PlaceHorizontal
+
+	// PlaceY places a string or text block vertically in an unstyled block of a
+	// given height. If the given height is shorter than the height of the string
+	// (measured by it's newlines) then this will be a noöp.
+	PlaceY = lipgloss.PlaceVertical
+
+	// Place places a string or text block vertically in an unstyled box of a given
+	// width or height.
+	Place = lipgloss.Place
+
 	// Top is a helper constant for the top edge of a block.
 	Top = lipgloss.Top
 	// Bottom is a helper constant for the bottom edge of a block.

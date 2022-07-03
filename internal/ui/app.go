@@ -19,11 +19,6 @@ import (
 	"github.com/muesli/termenv"
 )
 
-const (
-	viewBorderHeight = 1
-	viewBorderWidth  = 1
-)
-
 // App is the interface that wraps the types.App interface.
 var _ types.App = &App{}
 
@@ -37,6 +32,7 @@ type App struct {
 
 	// App-level models.
 	commandbar *model.CommandBar
+	navbar     *model.NavBar
 	statusbar  *model.StatusBar
 
 	// State related items.
@@ -62,10 +58,16 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 	a.keys = model.NewKeyMap(a)
 
 	a.commandbar = model.NewCommandBar(a)
+	a.navbar = model.NewNavBar(a, []types.Viewable{
+		types.ViewRoot,
+		types.ViewTargets,
+		types.ViewHelp,
+	})
 	a.statusbar = model.NewStatusBar(a, a.keys)
 
 	a.views[types.ViewRoot] = view.NewRoot(a)
 	a.views[types.ViewHelp] = view.NewHelp(a, a.keys)
+	a.views[types.ViewTargets] = view.NewTargets(a)
 
 	// Send initial sizes to all views.
 	vh, vw := a.getViewSize()
@@ -112,7 +114,11 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, types.KeyQuit):
 			return a, tea.Quit
 		case key.Matches(msg, types.KeyHelp) && !cmdFocused:
-			a.SetActive(types.ViewHelp, true)
+			if a.IsFocused(types.ViewHelp) {
+				a.Back(true)
+			} else {
+				a.SetActive(types.ViewHelp, true)
+			}
 			return a, nil
 		}
 
@@ -134,32 +140,29 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Check to see if the mouse is over the commandbar, or statusbar.
 
 			if msg.Y < a.commandbar.Height {
-				a.SetFocused(types.ViewCommandBar)
 				_, cmd = a.commandbar.Update(msg)
 				return a, cmd
 			}
 
+			if msg.Y < a.commandbar.Height+a.navbar.Height {
+				_, cmd = a.navbar.Update(msg)
+				return a, cmd
+			}
+
 			if msg.Y >= a.height-a.statusbar.Height {
-				a.SetFocused(types.ViewStatusBar)
 				_, cmd = a.statusbar.Update(msg)
 				return a, cmd
 			}
 
-			if a.IsFocused(types.ViewCommandBar) { // If the command bar was focused, unfocus it.
-				a.SetFocused(a.active)
-				a.commandbar.Update(model.MsgNone)
-			}
-
-			minYBounds := a.commandbar.Height + viewBorderHeight
-			maxYBounds := a.height - a.statusbar.Height - viewBorderHeight - 1
-			minXBounds := viewBorderWidth
-			maxXBounds := a.width - viewBorderWidth - 1
+			minYBounds := a.commandbar.Height
+			maxYBounds := a.height - a.statusbar.Height - 1
+			minXBounds := 0
+			maxXBounds := a.width - 1
 
 			if msg.Y >= minYBounds && msg.Y <= maxYBounds && msg.X >= minXBounds && msg.X <= maxXBounds {
 				// Don't propagate mouse events to anything but the active view.
 				msg.X -= minXBounds
 				msg.Y -= minYBounds
-				a.SetFocused(a.active)
 				_, cmd = a.views[a.active].Update(msg)
 				return a, cmd
 			}
@@ -190,6 +193,14 @@ func (a *App) propagateMessage(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if _, ok := msg.(tea.WindowSizeMsg); ok {
+		componentMsg = tea.WindowSizeMsg{Height: a.navbar.Height, Width: a.width}
+	}
+	_, cmd = a.navbar.Update(componentMsg)
+	if cmd != nil {
+		cmds = append(cmds, cmd)
+	}
+
+	if _, ok := msg.(tea.WindowSizeMsg); ok {
 		componentMsg = tea.WindowSizeMsg{Height: a.statusbar.Height, Width: a.width}
 	}
 	_, cmd = a.statusbar.Update(componentMsg)
@@ -214,11 +225,10 @@ func (a *App) propagateMessage(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (a *App) getViewSize() (h, w int) {
 	h = a.height -
 		a.commandbar.Height -
-		a.statusbar.Height -
-		(2 * viewBorderHeight)
+		a.navbar.Height -
+		a.statusbar.Height
 
-	w = a.width -
-		(2 * viewBorderWidth)
+	w = a.width
 
 	return h, w
 }
@@ -233,16 +243,8 @@ func (a *App) View() string {
 	}
 
 	v := a.views[a.active].View()
-	s := lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderBackground(types.Theme.ViewBorderBg).
-		BorderForeground(types.Theme.ViewBorderInactiveFg)
 
-	if a.IsFocused(a.active) {
-		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
-	}
-
-	return x.Y(lipgloss.Top, a.commandbar.View(), s.Render(v), a.statusbar.View())
+	return x.Y(lipgloss.Top, a.commandbar.View(), a.navbar.View(), v, a.statusbar.View())
 }
 
 func (a *App) SetFocused(v types.Viewable) {
@@ -258,17 +260,19 @@ func (a *App) IsFocused(v types.Viewable) bool {
 }
 
 func (a *App) SetActive(v types.Viewable, focused bool) {
-	if a.active == v {
-		a.Back(focused)
-		return
+	if v != a.active {
+		_, _ = a.Update(types.ViewChangeMsg{View: v})
 	}
 
 	a.previous = a.active
 	a.active = v
-	_, _ = a.Update(types.ViewChangeMsg{View: v})
 
 	if focused {
 		a.SetFocused(v)
+	}
+
+	if a.previous == types.ViewHelp {
+		a.previous = types.ViewRoot
 	}
 }
 
@@ -281,13 +285,16 @@ func (a *App) Previous() types.Viewable {
 }
 
 func (a *App) Back(focused bool) {
-	a.previous = types.ViewRoot
-	a.active = types.ViewRoot
-	_, _ = a.Update(types.ViewChangeMsg{View: a.active})
+	a.active, a.previous = a.previous, a.active
+
+	if a.active == a.previous {
+		a.active = types.ViewRoot
+	}
 
 	if focused {
-		a.SetFocused(types.ViewRoot)
+		a.SetFocused(a.active)
 	}
+	_, _ = a.Update(types.ViewChangeMsg{View: a.active})
 }
 
 func (a *App) Init() tea.Cmd {

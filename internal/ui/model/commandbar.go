@@ -79,8 +79,11 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseRight: // TODO: right click to change mode, and left to change cursor position?
+			m.app.SetFocused(m.is)
 			m.toggle()
 		case tea.MouseLeft:
+			m.app.SetFocused(m.is)
+
 			msg.X -= 6 // Account for border, command type, cursor prefix, etc.
 			msg.Y -= 1
 

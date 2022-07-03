@@ -12,7 +12,9 @@ const (
 	ViewRoot        Viewable = "main"
 	ViewCommandBar  Viewable = "commandbar"
 	ViewStatusBar   Viewable = "statusbar"
+	ViewNavigation  Viewable = "navigation"
 	ViewHelp        Viewable = "help"
+	ViewTargets     Viewable = "targets"
 	ViewAbout       Viewable = "about"
 	SubViewSomeItem Viewable = "someitem"
 )
