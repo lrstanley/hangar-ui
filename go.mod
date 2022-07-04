@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.22.0
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/knipferrc/teacup v0.2.0
-	github.com/lrstanley/clix v0.0.0-20220620170836-7ff14fc060ed
+	github.com/lrstanley/clix v0.0.0-20220704215932-712836d7df85
 	github.com/muesli/termenv v0.12.0
 )
 
@@ -43,14 +43,14 @@ require (
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20220630215102-69896b714898 // indirect
-	golang.org/x/sys v0.0.0-20220702020025-31831981b65f // indirect
+	golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-require golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
+require golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0 // indirect
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -68,5 +68,3 @@ require (
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
-
-replace github.com/lrstanley/clix => ../clix
