@@ -5,8 +5,7 @@
 package model
 
 import (
-	"log"
-
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/teacup/icons"
@@ -45,6 +44,7 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 			app:    app,
 			is:     types.ViewStatusBar,
 			Height: 1,
+			logger: log.WithField("src", "statusbar"),
 		},
 		keys:   keys,
 		Target: "target",
@@ -83,7 +83,8 @@ func (m *StatusBar) Init() tea.Cmd {
 }
 
 func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("StatusBar.Update: %#v", msg)
+	m.logger.Debugf("msg: %#v", msg)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
@@ -91,7 +92,6 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.MouseLeft:
 			if msg.X <= (x.W(m.Target) + 2) {
-				log.Println("triggering target")
 				m.app.SetActive(types.ViewTargets, true)
 				return m, nil
 			}

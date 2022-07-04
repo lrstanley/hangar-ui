@@ -6,10 +6,9 @@ package main
 
 import (
 	"context"
-	"io"
-	"log"
+	"fmt"
 
-	llog "github.com/apex/log"
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lrstanley/clix"
 	"github.com/lrstanley/hangar-ui/internal/types"
@@ -17,7 +16,7 @@ import (
 )
 
 var (
-	logger llog.Interface
+	logger log.Interface
 
 	cli = &clix.CLI[types.Flags]{
 		Links: clix.GithubLinks("github.com/lrstanley/hangar-ui", "master", "https://liam.sh"),
@@ -25,19 +24,14 @@ var (
 )
 
 func main() {
+	cli.LoggerConfig.Quiet = true
 	cli.Parse()
-	logger = cli.Logger
-	ctx := llog.NewContext(context.Background(), logger)
 
-	if cli.Debug {
-		// TODO: map to log.Logger.
-		if f, err := tea.LogToFile("debug.log", "hangar-ui"); err != nil {
-			logger.WithError(err).Fatal("failed to log to file")
-		} else {
-			defer f.Close()
-		}
-	} else {
-		log.SetOutput(io.Discard)
+	logger = cli.Logger
+	ctx := log.NewContext(context.Background(), logger)
+
+	if !cli.LoggerConfig.Quiet && cli.LoggerConfig.Path == "" {
+		fmt.Println("logger config path is required if logging is enabled")
 	}
 
 	types.SetTheme("default")

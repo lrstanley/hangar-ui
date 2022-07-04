@@ -7,14 +7,16 @@ package model
 import (
 	"strings"
 
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lrstanley/hangar-ui/internal/types"
 )
 
 type Base struct {
 	tea.Model
-	app types.App
-	is  types.Viewable
+	app    types.App
+	is     types.Viewable
+	logger log.Interface
 
 	Height int
 	Width  int

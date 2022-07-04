@@ -5,9 +5,9 @@
 package view
 
 import (
-	"log"
 	"strings"
 
+	"github.com/apex/log"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -31,8 +31,9 @@ type Help struct {
 func NewHelp(app types.App, keys *model.KeyMap) *Help {
 	v := &Help{
 		Base: &Base{
-			app: app,
-			is:  types.ViewHelp,
+			app:    app,
+			is:     types.ViewHelp,
+			logger: log.WithField("src", "help"),
 		},
 		keys:  keys,
 		model: viewport.New(0, 0),
@@ -90,7 +91,8 @@ func (v *Help) generateHelp() {
 func (v *Help) Init() tea.Cmd { return nil }
 
 func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("Help.Update: %#v", msg)
+	v.logger.Debugf("msg: %#v", msg)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height

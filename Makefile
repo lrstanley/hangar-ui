@@ -44,7 +44,7 @@ dlv: prepare
 		${PACKAGE} -- --debug
 
 debug: prepare
-	go run ${PACKAGE} --debug
+	go run ${PACKAGE} --debug --log.path debug.log
 
 build: prepare fetch
 	CGO_ENABLED=0 \

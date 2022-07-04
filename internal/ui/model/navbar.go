@@ -5,8 +5,7 @@
 package model
 
 import (
-	"log"
-
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
@@ -33,6 +32,7 @@ func NewNavBar(app types.App, views []types.Viewable) *NavBar {
 			app:    app,
 			is:     types.ViewNavigation,
 			Height: 1,
+			logger: log.WithField("src", "navbar"),
 		},
 		views: views,
 	}
@@ -41,13 +41,12 @@ func NewNavBar(app types.App, views []types.Viewable) *NavBar {
 		Foreground(types.Theme.NavActiveFg).
 		Background(types.Theme.NavActiveBg).
 		Padding(0, 1).
-		MarginRight(navBarItemMargin)
+		MarginRight(navBarItemMargin).
+		MarginBackground(types.Theme.Bg)
 
-	m.inactiveStyle = lipgloss.NewStyle().
+	m.inactiveStyle = m.activeStyle.Copy().
 		Foreground(types.Theme.NavInactiveFg).
-		Background(types.Theme.NavInactiveBg).
-		Padding(0, 1).
-		MarginRight(navBarItemMargin)
+		Background(types.Theme.NavInactiveBg)
 
 	return m
 }
@@ -57,7 +56,8 @@ func (m *NavBar) Init() tea.Cmd {
 }
 
 func (m *NavBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("NavBar.Update: %#v", msg)
+	m.logger.Debugf("msg: %#v", msg)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
@@ -93,7 +93,8 @@ func (m *NavBar) View() string {
 	s := lipgloss.NewStyle().
 		Width(m.Width).
 		MaxWidth(m.Width).
-		Padding(0, navBarPadding)
+		Padding(0, navBarPadding).
+		Background(types.Theme.Bg)
 
 	active := m.app.Active()
 	var style lipgloss.Style
@@ -112,8 +113,10 @@ func (m *NavBar) View() string {
 		m.buf.WriteString(style.Render(string(v)))
 	}
 
-	last := style.Margin(0).Render(string(m.views[len(m.views)-1]))
-	spaceLeft := m.Width - x.W(m.buf.String()) - (2 * navBarPadding)
-
-	return s.Render(m.buf.String() + x.PlaceX(spaceLeft, x.Right, last))
+	return s.Render(m.buf.String() + x.PlaceX(
+		m.Width-x.W(m.buf.String())-(2*navBarPadding),
+		x.Right,
+		style.Margin(0).Render(string(m.views[len(m.views)-1])),
+		lipgloss.WithWhitespaceBackground(types.Theme.Bg),
+	))
 }

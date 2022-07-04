@@ -5,8 +5,7 @@
 package view
 
 import (
-	"log"
-
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
@@ -19,8 +18,9 @@ type Root struct {
 func NewRoot(app types.App) *Root {
 	return &Root{
 		Base: &Base{
-			app: app,
-			is:  types.ViewRoot,
+			app:    app,
+			is:     types.ViewRoot,
+			logger: log.WithField("src", "help"),
 		},
 	}
 }
@@ -28,7 +28,8 @@ func NewRoot(app types.App) *Root {
 func (v *Root) Init() tea.Cmd { return nil }
 
 func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("Root.Update: %#v", msg)
+	v.logger.Debugf("msg: %#v", msg)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height

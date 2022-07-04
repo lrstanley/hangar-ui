@@ -4,7 +4,11 @@
 
 package x
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+)
 
 var (
 	// X is a utility function for horizontally joining two
@@ -71,3 +75,11 @@ var (
 	// Right is a helper constant for the right edge of a block.
 	Right = lipgloss.Right
 )
+
+func Expand(v int) string {
+	if v < 1 {
+		return ""
+	}
+
+	return strings.Repeat("\n", v)
+}

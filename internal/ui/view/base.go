@@ -5,13 +5,15 @@
 package view
 
 import (
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lrstanley/hangar-ui/internal/types"
 )
 
 type Base struct {
-	app types.App
-	is  types.Viewable
+	app    types.App
+	is     types.Viewable
+	logger log.Interface
 
 	height int
 	width  int

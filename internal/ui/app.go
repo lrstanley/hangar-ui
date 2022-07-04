@@ -6,8 +6,8 @@ package ui
 
 import (
 	"context"
-	"log"
 
+	"github.com/apex/log"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -24,8 +24,9 @@ var _ types.App = &App{}
 
 type App struct {
 	// Core.
-	cli  *clix.CLI[types.Flags]
-	keys *model.KeyMap
+	cli    *clix.CLI[types.Flags]
+	logger log.Interface
+	keys   *model.KeyMap
 
 	height int
 	width  int
@@ -47,7 +48,8 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 	lipgloss.SetHasDarkBackground(termenv.HasDarkBackground())
 
 	a := &App{
-		cli: cli,
+		cli:    cli,
+		logger: log.WithField("src", "app"),
 
 		focused:  types.ViewRoot,
 		active:   types.ViewRoot,
@@ -81,7 +83,8 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 }
 
 func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("App.Update: %#v", msg)
+	a.logger.Debugf("msg: %#v", msg)
+
 	var cmd tea.Cmd
 
 	// Only do updates if we're initialized, or it's a window size message, which

@@ -5,8 +5,7 @@
 package model
 
 import (
-	"log"
-
+	"github.com/apex/log"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,8 +21,10 @@ const (
 type CommandBar struct {
 	*Base
 
-	input       textinput.Model
-	method      Msg
+	input         textinput.Model
+	method        Msg
+	previousValue string
+
 	style       lipgloss.Style
 	prefixStyle lipgloss.Style
 }
@@ -34,6 +35,7 @@ func NewCommandBar(app types.App) *CommandBar {
 			app:    app,
 			is:     types.ViewCommandBar,
 			Height: 3,
+			logger: log.WithField("src", "commandbar"),
 		},
 		input: textinput.New(),
 	}
@@ -64,12 +66,26 @@ func (m *CommandBar) toggle() {
 	}
 }
 
+func (m *CommandBar) propagateEvent(msg tea.Msg) {
+	if _, ok := msg.(types.FilterMsg); ok {
+		return
+	}
+
+	val := m.input.Value()
+
+	if m.previousValue != val {
+		m.app.Update(types.FilterMsg{Filter: val})
+		m.previousValue = val
+	}
+}
+
 func (m *CommandBar) Init() tea.Cmd {
 	return nil
 }
 
 func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	log.Printf("CommandBar.Update: %#v", msg)
+	m.logger.Debugf("msg: %#v", msg)
+
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -101,6 +117,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.input.Blur()
 		}
 
+		m.propagateEvent(msg)
 		return m, nil
 	case types.FocusChangeMsg:
 		if m.is != msg.View {
@@ -131,6 +148,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.method = MsgNone
 			m.input.Blur()
 			m.app.SetFocused(m.app.Active())
+			m.propagateEvent(msg)
 			return m, nil
 		case key.Matches(msg, types.KeyEnter):
 			if m.method == MsgCmdInvoke {
@@ -147,7 +165,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.input, cmd = m.input.Update(msg)
-
+	m.propagateEvent(msg)
 	return m, cmd
 }
 
