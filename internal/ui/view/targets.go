@@ -40,9 +40,9 @@ func NewTargets(app types.App) *Targets {
 			logger: log.WithField("src", "targets"),
 		},
 		model: table.New([]table.Column{
-			table.NewFlexColumn(colKeyTargetName, "Name", 3),
-			table.NewFlexColumn(colKeyTargetURL, "URL", 3),
-			table.NewFlexColumn(colKeyTargetTeam, "Team", 3),
+			table.NewFlexColumn(colKeyTargetName, "Name", 3).WithFiltered(true),
+			table.NewFlexColumn(colKeyTargetURL, "URL", 3).WithFiltered(true),
+			table.NewFlexColumn(colKeyTargetTeam, "Team", 3).WithFiltered(true),
 			table.NewFlexColumn(colKeyTargetExpires, "Expires", 1),
 		}).HighlightStyle(lipgloss.NewStyle().Background(types.Theme.NavActiveBg).Foreground(types.Theme.NavActiveBg)).
 			BorderRounded().
