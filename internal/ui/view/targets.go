@@ -5,6 +5,7 @@
 package view
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 
@@ -62,7 +63,7 @@ func NewTargets(app types.App) *Targets {
 
 	testing := []string{"BubbleTea", "Example", "Another thing", "This is a test"}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		rows = append(rows, table.NewRow(table.RowData{
 			colKeyTargetName:    testing[rand.Intn(len(testing))] + strconv.Itoa(i),
 			colKeyTargetURL:     "https://bubbletea.com",
@@ -86,8 +87,7 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.height = msg.Height
 		v.width = msg.Width
 
-		v.model = v.model.WithTargetWidth(msg.Width)
-		v.model = v.model.WithMaxTotalWidth(msg.Width)
+		v.model = v.model.WithTargetWidth(msg.Width).WithMaxTotalWidth(msg.Width)
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
@@ -125,9 +125,29 @@ func (v *Targets) View() string {
 	// - Top footer border +
 	// - Row bottom border +
 	// - Header & header footer == 6.
-	v.model = v.model.WithPageSize(v.height - 6)
-	rows := len(v.model.GetVisibleRows())
-	v.model = v.model.WithStaticFooter(x.Expand(v.height - rows - 6))
+	pageSize := v.height - 6
+	if pageSize < 1 {
+		return ""
+	}
+
+	v.model = v.model.WithPageSize(pageSize)
+
+	var padding string
+	if v.model.CurrentPage() == v.model.MaxPages() {
+		// Temporary solution to resolve this:
+		//   - https://github.com/Evertras/bubble-table/issues/116#issuecomment-1175664224
+		padding = x.Expand(pageSize - (v.model.TotalRows() % pageSize))
+	}
+
+	if v.model.MaxPages() > 1 {
+		padding += lipgloss.NewStyle().Align(x.Right).Render(fmt.Sprintf("%d/%d", v.model.CurrentPage(), v.model.MaxPages()))
+	}
+
+	if padding == "" {
+		padding += " "
+	}
+
+	v.model = v.model.WithStaticFooter(padding)
 
 	baseStyle := v.baseStyle.Copy()
 	if v.Focused() {
