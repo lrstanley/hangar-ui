@@ -53,7 +53,7 @@ func SetTheme(style string) {
 			ViewBorderBg:         lipgloss.AdaptiveColor{Dark: "#0A0F14", Light: "#0A0F14"},
 
 			NavActiveFg:   lipgloss.AdaptiveColor{Dark: "#FFFFFF", Light: "#FFFFFF"},
-			NavActiveBg:   lipgloss.AdaptiveColor{Dark: "#A550DF", Light: "#A550DF"},
+			NavActiveBg:   lipgloss.AdaptiveColor{Dark: "#6124DF", Light: "#6124DF"},
 			NavInactiveFg: lipgloss.AdaptiveColor{Dark: "#D9DCCF", Light: "#D9DCCF"},
 			NavInactiveBg: lipgloss.AdaptiveColor{Dark: "#353533", Light: "#353533"},
 

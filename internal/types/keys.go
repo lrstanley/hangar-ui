@@ -49,4 +49,8 @@ var (
 		key.WithKeys(":"),
 		key.WithHelp(":", "run command"),
 	)
+	KeyCmdBackspace = key.NewBinding(
+		key.WithKeys("backspace"),
+		key.WithHelp("backspace", "same as cancel if no input"),
+	)
 )

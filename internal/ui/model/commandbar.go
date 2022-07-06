@@ -150,6 +150,13 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.app.SetFocused(m.app.Active())
 			m.propagateEvent(msg)
 			return m, nil
+		case key.Matches(msg, types.KeyCmdBackspace) && m.input.Value() == "":
+			_ = m.input.Reset()
+			m.method = MsgNone
+			m.input.Blur()
+			m.app.SetFocused(m.app.Active())
+			m.propagateEvent(msg)
+			return m, nil
 		case key.Matches(msg, types.KeyEnter):
 			if m.method == MsgCmdInvoke {
 				// TODO: switch to command view.
