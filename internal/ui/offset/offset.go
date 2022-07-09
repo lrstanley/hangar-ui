@@ -6,14 +6,13 @@ package offset
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 	"strings"
 	"sync"
-	"unicode"
 	"unicode/utf8"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/ansi"
 )
 
 // calc is a app-wide offset calculator. To initialize it, call Initialize().
@@ -28,8 +27,8 @@ const (
 	identEnd      = '\x9C' // ANSI termination code.
 	identEndLen   = len(string(identEnd))
 
-	areaStart = "_bound_start"
-	areaEnd   = "_bound_end"
+	areaStart = "__start"
+	areaEnd   = "__end"
 )
 
 // Coords is a struct that holds the X and Y coordinates of an offset identifier.
@@ -41,31 +40,26 @@ type Coords struct {
 
 // IsZero returns true if Coords doesn't reference an offset. Useful when calling
 // Get() using an ID that hasn't been registered to have an offset yet.
-func (xy Coords) IsZero() bool {
+func (xy *Coords) IsZero() bool {
+	if xy == nil {
+		return true
+	}
 	return xy.id == ""
 }
 
-// InBounds returns true if the mouse event is within the bounds of the given
-// components dimensions. Returns false if Coords references an ID that hasn't
-// been set yet.
-func (xy Coords) InBounds(h, w int, e tea.MouseMsg) bool {
-	if xy.IsZero() {
-		return false
-	}
-
-	return e.X >= xy.X && e.X < xy.X+w && e.Y >= xy.Y && e.Y < xy.Y+h
-}
-
 type Area struct {
-	Start Coords
-	End   Coords
+	Start *Coords
+	End   *Coords
 }
 
-func (a Area) IsZero() bool {
+func (a *Area) IsZero() bool {
+	if a == nil {
+		return true
+	}
 	return a.Start.IsZero() || a.End.IsZero()
 }
 
-func (a Area) InBounds(e tea.MouseMsg) bool {
+func (a *Area) InBounds(e tea.MouseMsg) bool {
 	if a.IsZero() {
 		return false
 	}
@@ -85,7 +79,7 @@ func (a Area) InBounds(e tea.MouseMsg) bool {
 	return true
 }
 
-func (a Area) Pos(msg tea.MouseMsg) (x, y int) {
+func (a *Area) Pos(msg tea.MouseMsg) (x, y int) {
 	return msg.X - a.Start.X, msg.Y - a.Start.Y
 }
 
@@ -94,13 +88,13 @@ func (a Area) Pos(msg tea.MouseMsg) (x, y int) {
 type calculator struct {
 	ctx     context.Context
 	cancel  func()
-	setChan chan Coords
+	setChan chan *Coords
 
 	mapMu   sync.RWMutex
-	mapping map[string]Coords
+	mapping map[string]*Coords
 
 	idMu      sync.RWMutex
-	idCounter int64
+	idCounter int
 	ids       map[string]string // user ID -> generated control sequence ID.
 	rids      map[string]string // generated control sequence ID -> user ID.
 }
@@ -113,8 +107,8 @@ func Initialize() {
 	}
 
 	calc = &calculator{
-		setChan:   make(chan Coords, 200),
-		mapping:   make(map[string]Coords),
+		setChan:   make(chan *Coords, 200),
+		mapping:   make(map[string]*Coords),
 		ids:       make(map[string]string),
 		rids:      make(map[string]string),
 		idCounter: 500,
@@ -136,65 +130,72 @@ func Close() {
 // stored and re-used as long as the input ID hasn't changed. The ID uses ANSI
 // escape codes and an incrementing counter to ensure it doesn't conflict with
 // lipgloss's width checks.
-func ID(id string) string {
+func ID(id, v string) string {
 	if calc == nil {
 		panic("offset: not initialized")
 	}
 
+	startID := id + areaStart
+	endID := id + areaEnd
+
 	calc.idMu.RLock()
-	if id, ok := calc.ids[id]; ok {
-		calc.idMu.RUnlock()
-		return id
-	}
+	start := calc.ids[startID]
+	end := calc.ids[endID]
 	calc.idMu.RUnlock()
 
+	if start != "" && end != "" {
+		return start + v + end
+	}
+
 	calc.idMu.Lock()
+
 	calc.idCounter++
-	counter := fmt.Sprint(calc.idCounter)
-	calc.ids[id] = string(identStart) + counter + string(identEnd)
-	calc.rids[counter] = id
+	counter := strconv.Itoa(calc.idCounter)
+	start = string(identStart) + counter + string(identEnd)
+	calc.ids[startID] = start
+	calc.rids[counter] = startID // TODO: should this be counter, or start?
+
+	calc.idCounter++
+	counter = strconv.Itoa(calc.idCounter)
+	end = string(identStart) + counter + string(identEnd)
+	calc.ids[endID] = end
+	calc.rids[counter] = endID
+
 	calc.idMu.Unlock()
-	return calc.ids[id]
+	return start + v + end
 }
 
-// Clear removes any stored offsets for the given component ID.
+// Clear removes any stored offsets for the given ID.
 func Clear(id string) {
 	calc.mapMu.Lock()
-	delete(calc.mapping, id)
+	delete(calc.mapping, id+areaStart)
+	delete(calc.mapping, id+areaEnd)
 	calc.mapMu.Unlock()
 }
 
-// Get returns the offset of the given component ID. If the ID is not known (yet),
+// Get returns the offset info of the given ID. If the ID is not known (yet),
 // Get() returns a Coords with IsZero() == true.
-func Get(id string) (xy Coords) {
+func Get(id string) (a *Area) {
 	if calc == nil {
 		panic("offset: not initialized")
 	}
 
 	calc.mapMu.RLock()
-	xy = calc.mapping[id]
+	a = &Area{
+		Start: calc.mapping[id+areaStart],
+		End:   calc.mapping[id+areaEnd],
+	}
 	calc.mapMu.RUnlock()
-	return xy
+	return a
 }
 
-// GetReverse returns the component ID from a generated ID (that includes ANSI
+// getReverse returns the component ID from a generated ID (that includes ANSI
 // escape codes).
-func GetReverse(id string) (resolved string) {
+func getReverse(id string) (resolved string) {
 	calc.idMu.RLock()
 	resolved = calc.rids[id]
 	calc.idMu.RUnlock()
 	return resolved
-}
-
-func AreaID(id, v string) string {
-	return ID(id+areaStart) + v + ID(id+areaEnd)
-}
-
-func GetArea(id string) (a Area) {
-	a.Start = Get(id + areaStart)
-	a.End = Get(id + areaEnd)
-
-	return a
 }
 
 func worker() {
@@ -203,9 +204,8 @@ func worker() {
 		case <-calc.ctx.Done():
 			return
 		case xy := <-calc.setChan:
-			// log.Warnf("offset: %#v", xy)
 			calc.mapMu.Lock()
-			calc.mapping[GetReverse(xy.id)] = xy
+			calc.mapping[getReverse(xy.id)] = xy
 			calc.mapMu.Unlock()
 		}
 	}
@@ -253,19 +253,19 @@ func Scan(v string) string {
 			end = i
 
 			id = v[start+identStartLen : end-identEndLen]
-			if !isID(id) {
+			if !isNumber(id) {
 				continue
 			}
 
 			// calculate the offset here.
-			newlines = strings.Count(v[:start], "\n")
+			newlines = countNewlines(v[:start])
 			lastNewline = strings.LastIndex(v[:start], "\n")
 			if lastNewline == -1 {
 				lastNewline = 0
 			}
-			width = lipgloss.Width(v[lastNewline:start])
+			width = ansi.PrintableRuneWidth(v[lastNewline:start])
 
-			calc.setChan <- Coords{id: id, X: width, Y: newlines}
+			calc.setChan <- &Coords{id: id, X: width, Y: newlines}
 			v = v[:start] + v[end:]
 			i = start
 			vLen = len(v)
@@ -277,9 +277,9 @@ func Scan(v string) string {
 	}
 }
 
-func isID(rid string) bool {
+func isNumber(rid string) bool {
 	for _, r := range rid {
-		if !unicode.IsDigit(r) {
+		if r < '0' || r > '9' {
 			return false
 		}
 	}

@@ -92,7 +92,7 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseLeft:
-			if offset.GetArea("statusbar_target").InBounds(msg) {
+			if offset.Get("statusbar_target").InBounds(msg) {
 				m.app.SetActive(types.ViewTargets, true)
 				return m, nil
 			}
@@ -146,5 +146,5 @@ func (m *StatusBar) View() string {
 
 	help = m.baseStyle.Copy().Width(helpWidth+2).Align(lipgloss.Right).Padding(0, 1).Render(help)
 
-	return x.X(0, offset.AreaID("statusbar_target", target), help, url, logo)
+	return x.X(0, offset.ID("statusbar_target", target), help, url, logo)
 }

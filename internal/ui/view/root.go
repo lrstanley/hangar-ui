@@ -36,7 +36,7 @@ func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.height = msg.Height
 		v.width = msg.Width
 	case tea.MouseMsg:
-		if !offset.GetArea(string(v.is)).InBounds(msg) {
+		if !offset.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -64,5 +64,5 @@ func (v *Root) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return offset.AreaID(string(v.is), s.Render("// ROOT"))
+	return offset.ID(string(v.is), s.Render("// ROOT"))
 }

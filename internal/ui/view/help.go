@@ -101,7 +101,7 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.model.Height = msg.Height - v.model.Style.GetVerticalFrameSize() - 2 // 2 for border
 		v.model.Width = msg.Width - v.model.Style.GetHorizontalFrameSize() - 2 // 2 for border
 	case tea.MouseMsg:
-		if !offset.GetArea(string(v.is)).InBounds(msg) {
+		if !offset.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -142,5 +142,5 @@ func (v *Help) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return offset.AreaID(string(v.is), s.Render(out))
+	return offset.ID(string(v.is), s.Render(out))
 }

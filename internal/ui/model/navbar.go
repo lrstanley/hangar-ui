@@ -66,7 +66,7 @@ func (m *NavBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.MouseLeft:
 			for _, v := range m.views {
-				if offset.GetArea(string(v)).InBounds(msg) {
+				if offset.Get(string(v)).InBounds(msg) {
 					m.app.SetActive(v, true)
 					return m, nil
 				}
@@ -99,7 +99,7 @@ func (m *NavBar) View() string {
 			break
 		}
 
-		m.buf.WriteString(offset.AreaID(string(v), style.Render(string(v))))
+		m.buf.WriteString(offset.ID(string(v), style.Render(string(v))))
 	}
 
 	lastV := string(m.views[len(m.views)-1])
@@ -107,7 +107,7 @@ func (m *NavBar) View() string {
 	return s.Render(m.buf.String() + x.PlaceX(
 		m.Width-x.W(m.buf.String())-(2*navBarPadding),
 		x.Right,
-		offset.AreaID(lastV, style.Margin(0).Render(lastV)),
+		offset.ID(lastV, style.Margin(0).Render(lastV)),
 		lipgloss.WithWhitespaceBackground(types.Theme.Bg),
 	))
 }

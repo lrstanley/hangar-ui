@@ -90,7 +90,7 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		v.model = v.model.WithTargetWidth(msg.Width).WithMaxTotalWidth(msg.Width)
 	case tea.MouseMsg:
-		if !offset.GetArea(string(v.is)).InBounds(msg) {
+		if !offset.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -162,5 +162,5 @@ func (v *Targets) View() string {
 	}
 	// TODO: show a "no results found" message when no results are found.
 
-	return offset.AreaID(string(v.is), s.Render(v.model.WithBaseStyle(baseStyle).View()))
+	return offset.ID(string(v.is), s.Render(v.model.WithBaseStyle(baseStyle).View()))
 }

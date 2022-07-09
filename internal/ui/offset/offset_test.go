@@ -26,17 +26,17 @@ func TestMain(m *testing.M) {
 		{"lipgloss-basic-end", testStyle.Render("testing") + "a", testStyle.Render("testing") + "a", nil},
 		{"lipgloss-basic-start-end", "a" + testStyle.Render("testing") + "a", "a" + testStyle.Render("testing") + "a", nil},
 		{"lipgloss-basic-between", testStyle.Render("testing") + "a" + testStyle.Render("testing"), testStyle.Render("testing") + "a" + testStyle.Render("testing"), nil},
-		{"id-empty", ID("testing"), "", []string{"testing"}},
-		{"id-single-start", "a" + ID("testing"), "a", []string{"testing"}},
-		{"id-single-end", ID("testing") + "a", "a", []string{"testing"}},
-		{"id-single-start-end", "a" + ID("testing") + "a", "aa", []string{"testing"}},
-		{"id-single-between", ID("testing") + "a" + ID("testing"), "a", []string{"testing"}},
-		{"id-with-lipgloss-start", testStyle.Render(ID("testing") + "testing"), testStyle.Render("testing"), []string{"testing"}},
-		{"id-with-lipgloss-end", testStyle.Render("testing" + ID("testing")), testStyle.Render("testing"), []string{"testing"}},
-		{"id-multi-empty", ID("foo") + ID("bar"), "", []string{"foo", "bar"}},
-		{"id-multi-start", "a" + ID("foo") + ID("bar"), "a", []string{"foo", "bar"}},
-		{"id-multi-end", ID("foo") + ID("bar") + "a", "a", []string{"foo", "bar"}},
-		{"id-multi-start-end", "a" + ID("foo") + ID("bar") + "a", "aa", []string{"foo", "bar"}},
+		{"id-empty", ID("testing", ""), "", []string{"testing"}},
+		{"id-single-start", "a" + ID("testing", "a"), "aa", []string{"testing"}},
+		{"id-single-end", ID("testing", "a") + "a", "aa", []string{"testing"}},
+		{"id-single-start-end", "a" + ID("testing", "b") + "a", "aba", []string{"testing"}},
+		{"id-single-between", ID("testing", "b") + "a" + ID("testing", "b"), "bab", []string{"testing"}},
+		{"id-with-lipgloss-start", testStyle.Render(ID("testing", "testing") + "testing"), testStyle.Render("testingtesting"), []string{"testing"}},
+		{"id-with-lipgloss-end", testStyle.Render("testing" + ID("testing", "testing")), testStyle.Render("testingtesting"), []string{"testing"}},
+		{"id-multi-empty", ID("foo", "") + ID("bar", ""), "", []string{"foo", "bar"}},
+		{"id-multi-start", "a" + ID("foo", "") + ID("bar", ""), "a", []string{"foo", "bar"}},
+		{"id-multi-end", ID("foo", "") + ID("bar", "") + "a", "a", []string{"foo", "bar"}},
+		{"id-multi-start-end", "a" + ID("foo", "") + ID("bar", "") + "a", "aa", []string{"foo", "bar"}},
 	}
 
 	m.Run()
@@ -98,4 +98,14 @@ func FuzzScan(f *testing.F) {
 	f.Fuzz(func(t *testing.T, a string) {
 		_ = Scan(a)
 	})
+}
+
+func BenchmarkID(b *testing.B) {
+	for _, test := range testsScan {
+		b.Run(test.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = ID(test.name, test.in)
+			}
+		})
+	}
 }

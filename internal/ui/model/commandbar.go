@@ -94,7 +94,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.input.Width = msg.Width - 8
 	case tea.MouseMsg:
-		area := offset.GetArea("navbar")
+		area := offset.Get("navbar")
 		if !area.InBounds(msg) {
 			return m, nil
 		}
@@ -205,5 +205,5 @@ func (m *CommandBar) View() string {
 		prefix = "-"
 	}
 
-	return offset.AreaID("navbar", s.Render(m.prefixStyle.Render("["+prefix+"]")+input))
+	return offset.ID("navbar", s.Render(m.prefixStyle.Render("["+prefix+"]")+input))
 }
