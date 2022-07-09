@@ -15,6 +15,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
 	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
@@ -89,6 +90,10 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		v.model = v.model.WithTargetWidth(msg.Width).WithMaxTotalWidth(msg.Width)
 	case tea.MouseMsg:
+		if !offset.GetArea(string(v.is)).InBounds(msg) {
+			return v, nil
+		}
+
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
 			v.app.SetFocused(v.is)
@@ -136,7 +141,9 @@ func (v *Targets) View() string {
 	if v.model.CurrentPage() == v.model.MaxPages() {
 		// Temporary solution to resolve this:
 		//   - https://github.com/Evertras/bubble-table/issues/116#issuecomment-1175664224
-		padding = x.Expand(pageSize - (v.model.TotalRows() % pageSize))
+		if left := v.model.TotalRows() % pageSize; left > 0 {
+			padding = x.Expand(pageSize - left)
+		}
 	}
 
 	if v.model.MaxPages() > 1 {
@@ -144,7 +151,7 @@ func (v *Targets) View() string {
 	}
 
 	if padding == "" {
-		padding += " "
+		padding += " " // So the normal footer doesn't get used.
 	}
 
 	v.model = v.model.WithStaticFooter(padding)
@@ -153,8 +160,7 @@ func (v *Targets) View() string {
 	if v.Focused() {
 		baseStyle.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
+	// TODO: show a "no results found" message when no results are found.
 
-	// TODO: when pagination is triggered, our padded footer doesn't get used.
-
-	return s.Render(v.model.WithBaseStyle(baseStyle).View())
+	return offset.AreaID(string(v.is), s.Render(v.model.WithBaseStyle(baseStyle).View()))
 }

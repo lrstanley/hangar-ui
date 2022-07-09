@@ -14,6 +14,7 @@ import (
 	"github.com/lrstanley/clix"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/ui/model"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/ui/view"
 	"github.com/lrstanley/hangar-ui/internal/x"
 	"github.com/muesli/termenv"
@@ -46,6 +47,8 @@ type App struct {
 func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 	// See: https://github.com/charmbracelet/lipgloss/issues/73
 	lipgloss.SetHasDarkBackground(termenv.HasDarkBackground())
+
+	offset.Initialize()
 
 	a := &App{
 		cli:    cli,
@@ -134,44 +137,12 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		_, cmd = a.views[a.active].Update(msg)
 		return a, cmd
 	case tea.MouseMsg:
-		// Explicitly handle some specific mouse events.
 		switch msg.Type {
 		case tea.MouseWheelUp, tea.MouseWheelDown:
 			_, cmd = a.views[a.active].Update(msg)
 			return a, cmd
-		default:
-			// Check to see if the mouse is over the commandbar, or statusbar.
-
-			if msg.Y < a.commandbar.Height {
-				_, cmd = a.commandbar.Update(msg)
-				return a, cmd
-			}
-
-			if msg.Y < a.commandbar.Height+a.navbar.Height {
-				_, cmd = a.navbar.Update(msg)
-				return a, cmd
-			}
-
-			if msg.Y >= a.height-a.statusbar.Height {
-				_, cmd = a.statusbar.Update(msg)
-				return a, cmd
-			}
-
-			minYBounds := a.commandbar.Height
-			maxYBounds := a.height - a.statusbar.Height - 1
-			minXBounds := 0
-			maxXBounds := a.width - 1
-
-			if msg.Y >= minYBounds && msg.Y <= maxYBounds && msg.X >= minXBounds && msg.X <= maxXBounds {
-				// Don't propagate mouse events to anything but the active view.
-				msg.X -= minXBounds
-				msg.Y -= minYBounds
-				_, cmd = a.views[a.active].Update(msg)
-				return a, cmd
-			}
-
-			return a, nil
 		}
+		return a.propagateMessage(msg)
 	case types.ViewMsg: // A message for a specific view, propagated from a child.
 		_, cmd = a.views[msg.View].Update(msg.Msg)
 		return a, cmd
@@ -212,9 +183,16 @@ func (a *App) propagateMessage(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// All other components.
-	for _, v := range a.views {
-		if _, cmd = v.Update(msg); cmd != nil {
+	switch msg.(type) {
+	case tea.MouseMsg:
+		if _, cmd = a.views[a.active].Update(msg); cmd != nil {
 			cmds = append(cmds, cmd)
+		}
+	default:
+		for _, v := range a.views {
+			if _, cmd = v.Update(msg); cmd != nil {
+				cmds = append(cmds, cmd)
+			}
 		}
 	}
 
@@ -247,7 +225,12 @@ func (a *App) View() string {
 
 	v := a.views[a.active].View()
 
-	return x.Y(lipgloss.Top, a.commandbar.View(), a.navbar.View(), v, a.statusbar.View())
+	return offset.Scan(x.Y(
+		lipgloss.Top,
+		a.commandbar.View(),
+		a.navbar.View(),
+		v, a.statusbar.View(),
+	))
 }
 
 func (a *App) SetFocused(v types.Viewable) {

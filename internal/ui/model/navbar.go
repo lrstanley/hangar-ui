@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
@@ -63,24 +64,12 @@ func (m *NavBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 	case tea.MouseMsg:
 		switch msg.Type {
-		case tea.MouseLeft, tea.MouseRight:
-			msg.X -= navBarPadding // Account for the padding.
-
-			w := 0
-
-			for _, v := range m.views[:len(m.views)-1] {
-				w += len(string(v)) + navBarItemMargin + (2 * navBarPadding)
-
-				if msg.X < w {
+		case tea.MouseLeft:
+			for _, v := range m.views {
+				if offset.GetArea(string(v)).InBounds(msg) {
 					m.app.SetActive(v, true)
 					return m, nil
 				}
-			}
-
-			lastW := m.Width - x.W(string(m.views[len(m.views)-1])) - (4 * navBarPadding)
-			if msg.X >= lastW {
-				m.app.SetActive(m.views[len(m.views)-1], true)
-				return m, nil
 			}
 		}
 	}
@@ -110,13 +99,15 @@ func (m *NavBar) View() string {
 			break
 		}
 
-		m.buf.WriteString(style.Render(string(v)))
+		m.buf.WriteString(offset.AreaID(string(v), style.Render(string(v))))
 	}
+
+	lastV := string(m.views[len(m.views)-1])
 
 	return s.Render(m.buf.String() + x.PlaceX(
 		m.Width-x.W(m.buf.String())-(2*navBarPadding),
 		x.Right,
-		style.Margin(0).Render(string(m.views[len(m.views)-1])),
+		offset.AreaID(lastV, style.Margin(0).Render(lastV)),
 		lipgloss.WithWhitespaceBackground(types.Theme.Bg),
 	))
 }

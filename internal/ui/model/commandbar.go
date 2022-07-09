@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 const (
@@ -93,17 +94,24 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.input.Width = msg.Width - 8
 	case tea.MouseMsg:
+		area := offset.GetArea("navbar")
+		if !area.InBounds(msg) {
+			return m, nil
+		}
+
 		switch msg.Type {
-		case tea.MouseRight: // TODO: right click to change mode, and left to change cursor position?
+		case tea.MouseRight:
 			m.app.SetFocused(m.is)
-			m.toggle()
+			m.toggle() // TODO: toggle is still super buggy.
+			return m, nil
 		case tea.MouseLeft:
 			m.app.SetFocused(m.is)
 
-			msg.X -= 6 // Account for border, command type, cursor prefix, etc.
-			msg.Y -= 1
+			x, _ := area.Pos(msg)
 
-			m.input.SetCursor(msg.X)
+			x -= 6
+
+			m.input.SetCursor(x)
 			return m, nil
 		}
 	case Msg:
@@ -197,5 +205,5 @@ func (m *CommandBar) View() string {
 		prefix = "-"
 	}
 
-	return s.Render(m.prefixStyle.Render("["+prefix+"]") + input)
+	return offset.AreaID("navbar", s.Render(m.prefixStyle.Render("["+prefix+"]")+input))
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/teacup/icons"
 	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
@@ -91,7 +92,7 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseLeft:
-			if msg.X <= (x.W(m.Target) + 2) {
+			if offset.GetArea("statusbar_target").InBounds(msg) {
 				m.app.SetActive(types.ViewTargets, true)
 				return m, nil
 			}
@@ -130,7 +131,7 @@ func (m *StatusBar) View() string {
 
 		if helpWidth > 0 && totalWidth+w > helpWidth {
 			// If there's room for an ellipsis, print that.
-			tail = " " + m.baseStyle.Render(helpEllipsis)
+			tail = m.baseStyle.Render(" " + helpEllipsis)
 
 			if totalWidth+x.W(tail) < helpWidth {
 				help += tail
@@ -145,5 +146,5 @@ func (m *StatusBar) View() string {
 
 	help = m.baseStyle.Copy().Width(helpWidth+2).Align(lipgloss.Right).Padding(0, 1).Render(help)
 
-	return x.X(0, target, help, url, logo)
+	return x.X(0, offset.AreaID("statusbar_target", target), help, url, logo)
 }

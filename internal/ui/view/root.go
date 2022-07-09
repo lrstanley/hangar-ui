@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 type Root struct {
@@ -20,7 +21,7 @@ func NewRoot(app types.App) *Root {
 		Base: &Base{
 			app:    app,
 			is:     types.ViewRoot,
-			logger: log.WithField("src", "help"),
+			logger: log.WithField("src", "root"),
 		},
 	}
 }
@@ -35,6 +36,10 @@ func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.height = msg.Height
 		v.width = msg.Width
 	case tea.MouseMsg:
+		if !offset.GetArea(string(v.is)).InBounds(msg) {
+			return v, nil
+		}
+
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
 			v.app.SetFocused(v.is)
@@ -59,5 +64,5 @@ func (v *Root) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return s.Render("// ROOT")
+	return offset.AreaID(string(v.is), s.Render("// ROOT"))
 }

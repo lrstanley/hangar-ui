@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/ui/model"
+	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 type Help struct {
@@ -100,6 +101,10 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.model.Height = msg.Height - v.model.Style.GetVerticalFrameSize() - 2 // 2 for border
 		v.model.Width = msg.Width - v.model.Style.GetHorizontalFrameSize() - 2 // 2 for border
 	case tea.MouseMsg:
+		if !offset.GetArea(string(v.is)).InBounds(msg) {
+			return v, nil
+		}
+
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
 			v.app.SetFocused(v.is)
@@ -137,5 +142,5 @@ func (v *Help) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return s.Render(out)
+	return offset.AreaID(string(v.is), s.Render(out))
 }
