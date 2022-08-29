@@ -18,7 +18,7 @@ require (
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f // indirect
 	github.com/concourse/concourse v1.6.1-0.20220407194753-e6ad875114f6
 	github.com/containerd/console v1.0.3 // indirect
-	github.com/evertras/bubble-table v0.14.4
+	github.com/evertras/bubble-table v0.14.6
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/google/jsonapi v1.0.0 // indirect
 	github.com/gookit/color v1.5.1 // indirect
