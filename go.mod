@@ -5,11 +5,11 @@ go 1.18
 require (
 	github.com/apex/log v1.9.0
 	github.com/charmbracelet/bubbles v0.13.0
-	github.com/charmbracelet/bubbletea v0.22.1
+	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/knipferrc/teacup v0.2.0
 	github.com/lrstanley/clix v0.0.0-20220704215932-712836d7df85
-	github.com/muesli/termenv v0.12.0
+	github.com/muesli/termenv v0.13.0
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/muesli/ansi v0.0.0-20211031195517-c9f0611b6c70
 	github.com/muesli/cancelreader v0.2.2 // indirect
@@ -59,6 +59,7 @@ require (
 )
 
 require (
+	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/cppforlife/go-semi-semantic v0.0.0-20160921010311-576b6af77ae4 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
