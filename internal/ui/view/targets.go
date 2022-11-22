@@ -14,8 +14,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
+	zone "github.com/lrstanley/bubblezone"
 	"github.com/lrstanley/hangar-ui/internal/types"
-	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
@@ -90,7 +90,7 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		v.model = v.model.WithTargetWidth(msg.Width).WithMaxTotalWidth(msg.Width)
 	case tea.MouseMsg:
-		if !offset.Get(string(v.is)).InBounds(msg) {
+		if !zone.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -162,5 +162,5 @@ func (v *Targets) View() string {
 	}
 	// TODO: show a "no results found" message when no results are found.
 
-	return offset.ID(string(v.is), s.Render(v.model.WithBaseStyle(baseStyle).View()))
+	return zone.Mark(string(v.is), s.Render(v.model.WithBaseStyle(baseStyle).View()))
 }

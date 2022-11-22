@@ -8,8 +8,8 @@ import (
 	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	zone "github.com/lrstanley/bubblezone"
 	"github.com/lrstanley/hangar-ui/internal/types"
-	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 type Root struct {
@@ -36,7 +36,7 @@ func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.height = msg.Height
 		v.width = msg.Width
 	case tea.MouseMsg:
-		if !offset.Get(string(v.is)).InBounds(msg) {
+		if !zone.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -64,5 +64,5 @@ func (v *Root) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return offset.ID(string(v.is), s.Render("// ROOT"))
+	return zone.Mark(string(v.is), s.Render("// ROOT"))
 }

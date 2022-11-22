@@ -12,9 +12,9 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	zone "github.com/lrstanley/bubblezone"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/ui/model"
-	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 type Help struct {
@@ -101,7 +101,7 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		v.model.Height = msg.Height - v.model.Style.GetVerticalFrameSize() - 2 // 2 for border
 		v.model.Width = msg.Width - v.model.Style.GetHorizontalFrameSize() - 2 // 2 for border
 	case tea.MouseMsg:
-		if !offset.Get(string(v.is)).InBounds(msg) {
+		if !zone.Get(string(v.is)).InBounds(msg) {
 			return v, nil
 		}
 
@@ -142,5 +142,5 @@ func (v *Help) View() string {
 		s = s.BorderForeground(types.Theme.ViewBorderActiveFg)
 	}
 
-	return offset.ID(string(v.is), s.Render(out))
+	return zone.Mark(string(v.is), s.Render(out))
 }

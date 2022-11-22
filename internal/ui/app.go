@@ -11,10 +11,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	zone "github.com/lrstanley/bubblezone"
 	"github.com/lrstanley/clix"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/ui/model"
-	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 	"github.com/lrstanley/hangar-ui/internal/ui/view"
 	"github.com/lrstanley/hangar-ui/internal/x"
 	"github.com/muesli/termenv"
@@ -48,7 +48,7 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 	// See: https://github.com/charmbracelet/lipgloss/issues/73
 	lipgloss.SetHasDarkBackground(termenv.HasDarkBackground())
 
-	offset.Initialize()
+	zone.NewGlobal()
 
 	a := &App{
 		cli:    cli,
@@ -225,7 +225,7 @@ func (a *App) View() string {
 
 	v := a.views[a.active].View()
 
-	return offset.Scan(x.Y(
+	return zone.Scan(x.Y(
 		lipgloss.Top,
 		a.commandbar.View(),
 		a.navbar.View(),

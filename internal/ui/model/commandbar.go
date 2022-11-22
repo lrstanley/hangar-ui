@@ -10,8 +10,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	zone "github.com/lrstanley/bubblezone"
 	"github.com/lrstanley/hangar-ui/internal/types"
-	"github.com/lrstanley/hangar-ui/internal/ui/offset"
 )
 
 const (
@@ -94,8 +94,8 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.input.Width = msg.Width - 8
 	case tea.MouseMsg:
-		area := offset.Get("navbar")
-		if !area.InBounds(msg) {
+		z := zone.Get("navbar")
+		if !z.InBounds(msg) {
 			return m, nil
 		}
 
@@ -107,8 +107,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseLeft:
 			m.app.SetFocused(m.is)
 
-			x, _ := area.Pos(msg)
-
+			x, _ := z.Pos(msg)
 			x -= 6
 
 			m.input.SetCursor(x)
@@ -205,5 +204,5 @@ func (m *CommandBar) View() string {
 		prefix = "-"
 	}
 
-	return offset.ID("navbar", s.Render(m.prefixStyle.Render("["+prefix+"]")+input))
+	return zone.Mark("navbar", s.Render(m.prefixStyle.Render("["+prefix+"]")+input))
 }

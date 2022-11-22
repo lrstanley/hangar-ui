@@ -16,10 +16,7 @@ docker-build:
 		--force-rm .
 
 license:
-	curl -sLo /tmp/license-header.txt https://liam.sh/-/gh/g/license-header
-	go install github.com/google/addlicense@latest
-	find -type f -name "*.go" -exec go run github.com/google/addlicense@latest \
-		-f /tmp/license-header.txt "{}" \;
+	curl -sL https://liam.sh/-/gh/g/license-header.sh | bash -s
 
 # cli
 prepare:
