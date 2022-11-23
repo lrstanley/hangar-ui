@@ -11,3 +11,10 @@ type FilterMsg struct {
 func (m FilterMsg) Value() string {
 	return m.Filter
 }
+
+type FlyMsg int
+
+const (
+	FlyTargetsUpdated FlyMsg = iota + 1
+	FlyActiveTargetUpdated
+)

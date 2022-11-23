@@ -6,8 +6,6 @@ package view
 
 import (
 	"fmt"
-	"math/rand"
-	"strconv"
 
 	"github.com/apex/log"
 	"github.com/charmbracelet/bubbles/key"
@@ -15,15 +13,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
 	zone "github.com/lrstanley/bubblezone"
+	"github.com/lrstanley/hangar-ui/internal/api"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
 const (
-	colKeyTargetName    = "name"
-	colKeyTargetURL     = "url"
-	colKeyTargetTeam    = "team"
-	colKeyTargetExpires = "expires"
+	colKeyTargetName     = "name"
+	colKeyTargetURL      = "url"
+	colKeyTargetTeam     = "team"
+	colKeyTargetInsecure = "insecure"
+	colKeyTargetExpires  = "expires"
 )
 
 type Targets struct {
@@ -35,7 +35,7 @@ type Targets struct {
 }
 
 func NewTargets(app types.App) *Targets {
-	m := &Targets{
+	v := &Targets{
 		Base: &Base{
 			app:    app,
 			is:     types.ViewTargets,
@@ -43,10 +43,11 @@ func NewTargets(app types.App) *Targets {
 		},
 		model: table.New([]table.Column{
 			table.NewFlexColumn(colKeyTargetName, "Name", 3).WithFiltered(true),
-			table.NewFlexColumn(colKeyTargetURL, "URL", 3).WithFiltered(true),
+			table.NewFlexColumn(colKeyTargetURL, "URL", 4).WithFiltered(true),
 			table.NewFlexColumn(colKeyTargetTeam, "Team", 3).WithFiltered(true),
+			table.NewFlexColumn(colKeyTargetInsecure, "Insecure", 1),
 			table.NewFlexColumn(colKeyTargetExpires, "Expires", 1),
-		}).HighlightStyle(lipgloss.NewStyle().Background(types.Theme.NavActiveBg).Foreground(types.Theme.NavActiveBg)).
+		}).HighlightStyle(lipgloss.NewStyle().Background(types.Theme.NavActiveBg).Foreground(types.Theme.NavActiveFg)).
 			BorderRounded().
 			SortByAsc(colKeyTargetName).
 			WithPageSize(1).
@@ -54,28 +55,32 @@ func NewTargets(app types.App) *Targets {
 			Focused(true).WithHighlightedRow(1).Filtered(true),
 	}
 
-	m.baseStyle = lipgloss.NewStyle().
+	v.baseStyle = lipgloss.NewStyle().
 		Foreground(types.Theme.Fg).
 		Background(types.Theme.Bg).
 		BorderBackground(types.Theme.ViewBorderBg).
 		BorderForeground(types.Theme.ViewBorderInactiveFg)
 
+	v.UpdateRows()
+
+	return v
+}
+
+func (v *Targets) UpdateRows() {
+	// TODO: add status column, show version and other info?
 	var rows []table.Row
 
-	testing := []string{"BubbleTea", "Example", "Another thing", "This is a test"}
-
-	for i := 0; i < 10; i++ {
+	for name, target := range api.Root.Targets() {
 		rows = append(rows, table.NewRow(table.RowData{
-			colKeyTargetName:    testing[rand.Intn(len(testing))] + strconv.Itoa(i),
-			colKeyTargetURL:     "https://bubbletea.com",
-			colKeyTargetTeam:    "BubbleTea " + strconv.Itoa(i),
-			colKeyTargetExpires: "Never",
+			colKeyTargetName:     string(name),
+			colKeyTargetURL:      target.API,
+			colKeyTargetTeam:     target.TeamName,
+			colKeyTargetInsecure: fmt.Sprintf("%t", target.Insecure),
+			colKeyTargetExpires:  "unknown",
 		}))
 	}
 
-	m.model = m.model.WithRows(rows)
-
-	return m
+	v.model = v.model.WithRows(rows)
 }
 
 func (v *Targets) Init() tea.Cmd { return nil }
@@ -107,10 +112,18 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, types.KeyCancel):
 			v.app.Back(true)
 			return v, nil
+		case key.Matches(msg, types.KeyEnter):
+			api.Root.SetActive(v.model.HighlightedRow().Data[colKeyTargetName].(string))
+			v.app.Back(true)
+			return v, nil
 		}
 	// TODO: https://github.com/Evertras/bubble-table/issues/116
 	case types.FilterMsg:
 		v.model = v.model.WithFilterInputValue(msg.Filter)
+	case types.FlyMsg:
+		if msg == types.FlyTargetsUpdated {
+			v.UpdateRows()
+		}
 	}
 
 	var cmd tea.Cmd

@@ -4,4 +4,6 @@
 
 package types
 
-type Flags struct{}
+type Flags struct {
+	Target string `short:"t" long:"target" description:"fly target to use"`
+}

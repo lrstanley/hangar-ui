@@ -11,6 +11,7 @@ import (
 	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/lrstanley/clix"
+	"github.com/lrstanley/hangar-ui/internal/api"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/ui"
 )
@@ -31,12 +32,18 @@ func main() {
 	ctx := log.NewContext(context.Background(), logger)
 
 	if !cli.LoggerConfig.Quiet && cli.LoggerConfig.Path == "" {
-		fmt.Println("logger config path is required if logging is enabled")
+		fmt.Println("log path is required if logging is enabled")
 	}
 
 	types.SetTheme("default")
 
+	api.NewAPIClient(ctx, cli)
 	app := ui.New(ctx, cli)
+
+	go api.Root.HandleSignal(func(cmd types.FlyMsg) {
+		logger.WithField("msg", fmt.Sprintf("%T", cmd)).WithField("cmd", cmd).Debug("received message from api client")
+		_, _ = app.Update(cmd)
+	})
 
 	if err := tea.NewProgram(app, tea.WithAltScreen(), tea.WithMouseCellMotion()).Start(); err != nil {
 		logger.WithError(err).Fatal("failed to start hangar-ui")

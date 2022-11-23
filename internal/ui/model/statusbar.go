@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/teacup/icons"
 	zone "github.com/lrstanley/bubblezone"
+	"github.com/lrstanley/hangar-ui/internal/api"
 	"github.com/lrstanley/hangar-ui/internal/types"
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
@@ -48,8 +49,8 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 			logger: log.WithField("src", "statusbar"),
 		},
 		keys:   keys,
-		Target: "target",
-		URL:    "concourse.example.com",
+		Target: api.Root.ActiveName(),
+		URL:    api.Root.Active().URL(),
 		Logo:   "hangar-ui",
 	}
 
@@ -96,6 +97,11 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.app.SetActive(types.ViewTargets, true)
 				return m, nil
 			}
+		}
+	case types.FlyMsg:
+		if msg == types.FlyActiveTargetUpdated {
+			m.Target = api.Root.ActiveName()
+			m.URL = api.Root.Active().URL()
 		}
 	}
 
