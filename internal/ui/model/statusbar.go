@@ -85,8 +85,6 @@ func (m *StatusBar) Init() tea.Cmd {
 }
 
 func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.logger.Debugf("msg: %#v", msg)
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width

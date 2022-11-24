@@ -86,8 +86,6 @@ func (v *Targets) UpdateRows() {
 func (v *Targets) Init() tea.Cmd { return nil }
 
 func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	v.logger.Debugf("msg: %#v", msg)
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height

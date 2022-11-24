@@ -92,8 +92,6 @@ func (v *Help) generateHelp() {
 func (v *Help) Init() tea.Cmd { return nil }
 
 func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	v.logger.Debugf("msg: %#v", msg)
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height

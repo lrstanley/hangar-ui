@@ -29,8 +29,6 @@ func NewRoot(app types.App) *Root {
 func (v *Root) Init() tea.Cmd { return nil }
 
 func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	v.logger.Debugf("msg: %#v", msg)
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		v.height = msg.Height
