@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbles v0.14.0
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.6.0
-	github.com/knipferrc/teacup v0.2.0
+	github.com/knipferrc/teacup v0.3.0
 	github.com/lrstanley/bubblezone v0.0.0-20221029233222-b3469cc5a659
 	github.com/lrstanley/clix v0.0.0-20220704215932-712836d7df85
 	github.com/muesli/termenv v0.13.0
@@ -43,7 +43,7 @@ require (
 	github.com/vito/go-sse v1.0.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/term v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
