@@ -4,34 +4,27 @@
 
 package api
 
-import (
-	"sync"
+// type Target struct {
+// 	Name string
 
-	"github.com/concourse/concourse/atc"
-	"github.com/concourse/concourse/fly/rc"
-)
+// 	mu sync.RWMutex
 
-type Target struct {
-	Name string
+// 	config rc.Target
 
-	mu sync.RWMutex
+// 	info      atc.Info
+// 	infoError error
+// }
 
-	config rc.Target
+// func (t *Target) fetchInfo() {
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	info      atc.Info
-	infoError error
-}
+// 	t.info, t.infoError = t.config.Client().GetInfo()
+// }
 
-func (t *Target) fetchInfo() {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// func (t *Target) Info() (atc.Info, error) {
+// 	t.mu.RLock()
+// 	defer t.mu.RUnlock()
 
-	t.info, t.infoError = t.config.Client().GetInfo()
-}
-
-func (t *Target) Info() (atc.Info, error) {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-
-	return t.info, t.infoError
-}
+// 	return t.info, t.infoError
+// }

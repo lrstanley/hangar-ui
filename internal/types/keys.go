@@ -39,6 +39,10 @@ var (
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "select"),
 	)
+	KeyReload = key.NewBinding(
+		key.WithKeys("ctrl+r"),
+		key.WithHelp("ctrl+r", "reload/refresh"),
+	)
 
 	// Specifically for the command bar.
 	KeyCmdFilter = key.NewBinding(

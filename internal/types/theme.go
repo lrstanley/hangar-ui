@@ -10,6 +10,9 @@ type ThemeConfig struct {
 	Fg lipgloss.AdaptiveColor
 	Bg lipgloss.AdaptiveColor
 
+	SuccessFg lipgloss.AdaptiveColor
+	FailureFg lipgloss.AdaptiveColor
+
 	ViewBorderActiveFg   lipgloss.AdaptiveColor
 	ViewBorderInactiveFg lipgloss.AdaptiveColor
 	ViewBorderBg         lipgloss.AdaptiveColor
@@ -47,6 +50,9 @@ func SetTheme(style string) {
 		Theme = &ThemeConfig{
 			Fg: lipgloss.AdaptiveColor{Dark: "#98D1CE", Light: "#98D1CE"},
 			Bg: lipgloss.AdaptiveColor{Dark: "#0A0F14", Light: "#0A0F14"},
+
+			SuccessFg: lipgloss.AdaptiveColor{Dark: "#69ff94", Light: "#69ff94"},
+			FailureFg: lipgloss.AdaptiveColor{Dark: "#ff6e6e", Light: "#ff6e6e"},
 
 			ViewBorderActiveFg:   lipgloss.AdaptiveColor{Dark: "#A550DF", Light: "#A550DF"},
 			ViewBorderInactiveFg: lipgloss.AdaptiveColor{Dark: "#D9DCCF", Light: "#D9DCCF"},
