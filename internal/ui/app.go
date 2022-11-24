@@ -284,5 +284,15 @@ func (a *App) Back(focused bool) {
 }
 
 func (a *App) Init() tea.Cmd {
-	return nil
+	cmds := []tea.Cmd{
+		a.commandbar.Init(),
+		a.navbar.Init(),
+		a.statusbar.Init(),
+	}
+
+	for _, v := range a.views {
+		cmds = append(cmds, v.Init())
+	}
+
+	return tea.Batch(cmds...)
 }
