@@ -7,6 +7,7 @@ package api
 import (
 	"time"
 
+	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/concourse/concourse/atc"
 	"github.com/concourse/concourse/fly/rc"
@@ -39,6 +40,12 @@ func (m *apiManager) QueryTargetInfo(delay time.Duration) func() tea.Msg {
 
 			info, err := t.Client().GetInfo()
 
+			m.logger.WithFields(log.Fields{
+				"target": name,
+				"error":  err,
+				"info":   info,
+			}).Debug("queried target info")
+
 			msg = append(msg, TargetInfo{
 				TargetName: string(name),
 				Target:     t,
@@ -46,8 +53,6 @@ func (m *apiManager) QueryTargetInfo(delay time.Duration) func() tea.Msg {
 				Error:      err,
 			})
 		}
-
-		m.logger.Debugf("%#v", msg)
 
 		return msg
 	}
