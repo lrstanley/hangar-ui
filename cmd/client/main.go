@@ -38,14 +38,14 @@ func main() {
 	types.SetTheme("default")
 
 	api.NewAPIClient(ctx, cli)
-	app := ui.New(ctx, cli)
+	prog := tea.NewProgram(ui.New(ctx, cli), tea.WithAltScreen(), tea.WithMouseCellMotion())
 
-	go api.Root.HandleSignal(func(cmd types.FlyMsg) {
+	go api.Manager.HandleMsg(func(cmd types.FlyMsg) {
 		logger.WithField("msg", fmt.Sprintf("%T", cmd)).WithField("cmd", cmd).Debug("received message from api client")
-		_, _ = app.Update(cmd)
+		prog.Send(cmd)
 	})
 
-	if err := tea.NewProgram(app, tea.WithAltScreen(), tea.WithMouseCellMotion()).Start(); err != nil {
+	if _, err := prog.Run(); err != nil {
 		logger.WithError(err).Fatal("failed to start hangar-ui")
 	}
 }

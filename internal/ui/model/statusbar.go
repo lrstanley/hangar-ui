@@ -49,8 +49,8 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 			logger: log.WithField("src", "statusbar"),
 		},
 		keys:   keys,
-		Target: api.Root.ActiveName(),
-		URL:    api.Root.Active().URL(),
+		Target: api.Manager.ActiveName(),
+		URL:    api.Manager.Active().URL(),
 		Logo:   "hangar-ui",
 	}
 
@@ -100,8 +100,8 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case types.FlyMsg:
 		if msg == types.FlyActiveTargetUpdated {
-			m.Target = api.Root.ActiveName()
-			m.URL = api.Root.Active().URL()
+			m.Target = api.Manager.ActiveName()
+			m.URL = api.Manager.Active().URL()
 		}
 	}
 

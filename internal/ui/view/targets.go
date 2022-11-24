@@ -70,7 +70,7 @@ func (v *Targets) UpdateRows() {
 	// TODO: add status column, show version and other info?
 	var rows []table.Row
 
-	for name, target := range api.Root.Targets() {
+	for name, target := range api.Manager.Targets() {
 		rows = append(rows, table.NewRow(table.RowData{
 			colKeyTargetName:     string(name),
 			colKeyTargetURL:      target.API,
@@ -113,7 +113,7 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			v.app.Back(true)
 			return v, nil
 		case key.Matches(msg, types.KeyEnter):
-			api.Root.SetActive(v.model.HighlightedRow().Data[colKeyTargetName].(string))
+			api.Manager.SetActive(v.model.HighlightedRow().Data[colKeyTargetName].(string))
 			v.app.Back(true)
 			return v, nil
 		}
