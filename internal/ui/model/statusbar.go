@@ -96,7 +96,7 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
-	case types.FlyMsg:
+	case types.FlyEvent:
 		if msg == types.FlyActiveTargetUpdated {
 			m.Target = api.Manager.ActiveName()
 			m.URL = api.Manager.Active().URL()

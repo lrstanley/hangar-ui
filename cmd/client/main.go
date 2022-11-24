@@ -40,10 +40,7 @@ func main() {
 	api.NewAPIClient(ctx, cli)
 	prog := tea.NewProgram(ui.New(ctx, cli), tea.WithAltScreen(), tea.WithMouseCellMotion())
 
-	go api.Manager.HandleMsg(func(cmd types.FlyMsg) {
-		logger.WithField("msg", fmt.Sprintf("%T", cmd)).WithField("cmd", cmd).Debug("received message from api client")
-		prog.Send(cmd)
-	})
+	go api.Manager.HandleMsg(prog.Send)
 
 	if _, err := prog.Run(); err != nil {
 		logger.WithError(err).Fatal("failed to start hangar-ui")

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/apex/log"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/concourse/concourse/fly/rc"
 	"github.com/concourse/concourse/go-concourse/concourse"
 	"github.com/lrstanley/clix"
@@ -23,7 +24,7 @@ type apiManager struct {
 	ctx      context.Context
 	logger   log.Interface
 	config   *clix.CLI[types.Flags]
-	signaler chan types.FlyMsg
+	signaler chan tea.Msg
 
 	cancelFn func()
 	wg       sync.WaitGroup
@@ -37,7 +38,7 @@ func NewAPIClient(ctx context.Context, config *clix.CLI[types.Flags]) {
 	Manager = &apiManager{
 		logger:   log.WithField("src", "api-client"),
 		config:   config,
-		signaler: make(chan types.FlyMsg, 50),
+		signaler: make(chan tea.Msg, 50),
 	}
 
 	Manager.ctx, Manager.cancelFn = context.WithCancel(ctx)
@@ -66,8 +67,8 @@ func NewAPIClient(ctx context.Context, config *clix.CLI[types.Flags]) {
 }
 
 // HandleMsg allows the user to handle a message from the signaler channel.
-func (c *apiManager) HandleMsg(cb func(types.FlyMsg)) {
-	var cmd types.FlyMsg
+func (c *apiManager) HandleMsg(cb func(tea.Msg)) {
+	var cmd tea.Msg
 	for {
 		select {
 		case <-c.ctx.Done():

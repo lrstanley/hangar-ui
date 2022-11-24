@@ -12,9 +12,9 @@ func (m FilterMsg) Value() string {
 	return m.Filter
 }
 
-type FlyMsg int
+type FlyEvent int
 
 const (
-	FlyTargetsUpdated FlyMsg = iota + 1
+	FlyTargetsUpdated FlyEvent = iota + 1
 	FlyActiveTargetUpdated
 )
