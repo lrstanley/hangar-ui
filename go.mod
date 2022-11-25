@@ -62,6 +62,7 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
 	github.com/cppforlife/go-semi-semantic v0.0.0-20160921010311-576b6af77ae4 // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect

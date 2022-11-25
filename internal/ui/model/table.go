@@ -17,16 +17,11 @@ import (
 	"github.com/lrstanley/hangar-ui/internal/x"
 )
 
-const (
-	colKeyTargetName     = "name"
-	colKeyTargetURL      = "url"
-	colKeyTargetTeam     = "team"
-	colKeyTargetInsecure = "insecure"
-	colKeyTargetExpires  = "expires"
-)
-
 type Table struct {
 	*Base
+
+	lastSortCol string
+	sortAsc     bool
 
 	dataUpdater func() table.RowData
 	model       table.Model
@@ -48,7 +43,6 @@ func NewTable(app types.App, is types.Viewable, columns []table.Column, sortBy s
 					Foreground(types.Theme.NavActiveFg),
 			).
 			BorderRounded().
-			SortByAsc(sortBy).
 			WithPageSize(1).
 			WithPaginationWrapping(false).
 			Focused(true).
@@ -63,6 +57,8 @@ func NewTable(app types.App, is types.Viewable, columns []table.Column, sortBy s
 		BorderBackground(types.Theme.ViewBorderBg).
 		BorderForeground(types.Theme.ViewBorderInactiveFg)
 
+	v.Sort(sortBy)
+
 	return v
 }
 
@@ -72,6 +68,29 @@ func (v *Table) UpdateRows(rows []table.Row) {
 
 func (v *Table) SelectedRow() table.Row {
 	return v.model.HighlightedRow()
+}
+
+func (v *Table) Sort(col string) {
+	if v.lastSortCol == col {
+		v.sortAsc = !v.sortAsc
+	} else {
+		v.sortAsc = true
+	}
+
+	if v.sortAsc {
+		v.model = v.model.SortByAsc(col)
+	} else {
+		v.model = v.model.SortByDesc(col).PageFirst().WithHighlightedRow(0)
+	}
+
+	v.lastSortCol = col
+}
+
+func (v *Table) Checkmark(val bool) table.StyledCell {
+	if val {
+		return table.NewStyledCell(types.Checkmark, lipgloss.NewStyle().Foreground(types.Theme.SuccessFg).Align(lipgloss.Center))
+	}
+	return table.NewStyledCell(types.XMark, lipgloss.NewStyle().Foreground(types.Theme.FailureFg).Align(lipgloss.Center))
 }
 
 func (v *Table) Init() tea.Cmd { return v.model.Init() }

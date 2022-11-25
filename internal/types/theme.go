@@ -6,6 +6,13 @@ package types
 
 import "github.com/charmbracelet/lipgloss"
 
+const (
+	Checkmark     = "✓"
+	CheckmarkBold = "✔"
+	XMark         = "✗"
+	XMarkBold     = "✘"
+)
+
 type ThemeConfig struct {
 	Fg lipgloss.AdaptiveColor
 	Bg lipgloss.AdaptiveColor

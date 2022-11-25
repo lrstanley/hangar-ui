@@ -14,6 +14,7 @@ const (
 	ViewStatusBar   Viewable = "statusbar"
 	ViewNavigation  Viewable = "navigation"
 	ViewHelp        Viewable = "help"
+	ViewPipelines   Viewable = "pipelines"
 	ViewTargets     Viewable = "targets"
 	ViewAbout       Viewable = "about"
 	SubViewSomeItem Viewable = "someitem"

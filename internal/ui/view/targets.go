@@ -62,7 +62,7 @@ func (v *Targets) UpdateRows() {
 			colKeyTargetName:     string(data.TargetName),
 			colKeyTargetURL:      data.Target.URL(),
 			colKeyTargetTeam:     data.Target.Team().Name(),
-			colKeyTargetInsecure: table.NewStyledCell("false", lipgloss.NewStyle().Foreground(types.Theme.SuccessFg)),
+			colKeyTargetInsecure: v.model.Checkmark(false),
 		}
 
 		if data.TargetName == api.Manager.ActiveName() {
@@ -70,7 +70,7 @@ func (v *Targets) UpdateRows() {
 		}
 
 		if data.Target.TLSConfig() == nil || data.Target.TLSConfig().InsecureSkipVerify {
-			row[colKeyTargetInsecure] = table.NewStyledCell("true", lipgloss.NewStyle().Foreground(types.Theme.FailureFg))
+			row[colKeyTargetInsecure] = v.model.Checkmark(true)
 		}
 
 		if data.Error == nil {

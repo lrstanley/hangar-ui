@@ -65,6 +65,7 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 	a.commandbar = model.NewCommandBar(a)
 	a.navbar = model.NewNavBar(a, []types.Viewable{
 		types.ViewRoot,
+		types.ViewPipelines,
 		types.ViewTargets,
 		types.ViewHelp,
 	})
@@ -72,6 +73,7 @@ func New(_ context.Context, cli *clix.CLI[types.Flags]) *App {
 
 	a.views[types.ViewRoot] = view.NewRoot(a)
 	a.views[types.ViewHelp] = view.NewHelp(a, a.keys)
+	a.views[types.ViewPipelines] = view.NewPipelines(a)
 	a.views[types.ViewTargets] = view.NewTargets(a)
 
 	// Send initial sizes to all views.
