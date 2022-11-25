@@ -105,27 +105,37 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// to children.
 		msg.Height, msg.Width = a.getViewSize()
 		return a.propagateMessage(msg)
+
 	case tea.KeyMsg:
 		cmdFocused := a.IsFocused(types.ViewCommandBar)
 
 		switch {
 		case key.Matches(msg, types.KeyCmdFilter) && !cmdFocused:
-			a.SetFocused(types.ViewCommandBar)
-			_, _ = a.commandbar.Update(model.MsgCmdFilter)
-			return a, nil
+			_, cmd = a.commandbar.Update(model.MsgCmdFilter)
+			return a, tea.Batch(
+				cmd,
+				types.MsgAsCmd(types.FocusChangeMsg{View: types.ViewCommandBar}),
+			)
+
 		case key.Matches(msg, types.KeyCmdInvoke) && !cmdFocused:
-			a.SetFocused(types.ViewCommandBar)
-			_, _ = a.commandbar.Update(model.MsgCmdInvoke)
-			return a, nil
+			_, cmd = a.commandbar.Update(model.MsgCmdInvoke)
+			return a, tea.Batch(
+				cmd,
+				types.MsgAsCmd(types.FocusChangeMsg{View: types.ViewCommandBar}),
+			)
+
 		case key.Matches(msg, types.KeyQuit):
 			return a, tea.Quit
+
 		case key.Matches(msg, types.KeyHelp) && !cmdFocused:
 			if a.IsFocused(types.ViewHelp) {
-				a.Back(true)
-			} else {
-				a.SetActive(types.ViewHelp, true)
+				return a, types.MsgAsCmd(types.AppBackMsg{Focused: true})
 			}
-			return a, nil
+
+			return a, tea.Batch(
+				types.MsgAsCmd(types.ViewChangeMsg{View: types.ViewHelp}),
+				types.MsgAsCmd(types.FocusChangeMsg{View: types.ViewHelp}),
+			)
 		}
 
 		if cmdFocused {
@@ -136,6 +146,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Don't propagate key messages to anything but the active view.
 		_, cmd = a.views[a.active].Update(msg)
 		return a, cmd
+
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp, tea.MouseWheelDown:
@@ -143,9 +154,47 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a, cmd
 		}
 		return a.propagateMessage(msg)
+
 	case types.ViewMsg: // A message for a specific view, propagated from a child.
 		_, cmd = a.views[msg.View].Update(msg.Msg)
 		return a, cmd
+
+	case types.AppBackMsg: // A message to go back to the previous view.
+		a.active, a.previous = a.previous, a.active
+
+		if a.active == a.previous {
+			a.active = types.ViewRoot
+		}
+
+		if msg.Focused {
+			return a, tea.Batch(
+				types.MsgAsCmd(types.ViewChangeMsg{View: a.active}),
+				types.MsgAsCmd(types.FocusChangeMsg{View: a.active}),
+			)
+		}
+
+		return a, types.MsgAsCmd(types.ViewChangeMsg{View: a.active})
+
+	case types.ViewChangeMsg: // A message to change the active view.
+		if msg.View == a.active {
+			return a, nil
+		}
+
+		a.previous = a.active
+		a.active = msg.View
+
+		if a.previous == types.ViewHelp {
+			a.previous = types.ViewRoot
+		}
+		return a.propagateMessage(msg)
+
+	case types.FocusChangeMsg: // A message to change the focused view.
+		if msg.View == a.focused {
+			return a, nil
+		}
+
+		a.focused = msg.View
+		return a.propagateMessage(msg)
 	}
 
 	return a.propagateMessage(msg)
@@ -233,33 +282,8 @@ func (a *App) View() string {
 	))
 }
 
-func (a *App) SetFocused(v types.Viewable) {
-	if a.focused != v {
-		_, _ = a.Update(types.FocusChangeMsg{View: v})
-	}
-
-	a.focused = v
-}
-
 func (a *App) IsFocused(v types.Viewable) bool {
 	return a.focused == v
-}
-
-func (a *App) SetActive(v types.Viewable, focused bool) {
-	if v != a.active {
-		_, _ = a.Update(types.ViewChangeMsg{View: v})
-	}
-
-	a.previous = a.active
-	a.active = v
-
-	if focused {
-		a.SetFocused(v)
-	}
-
-	if a.previous == types.ViewHelp {
-		a.previous = types.ViewRoot
-	}
 }
 
 func (a *App) Active() types.Viewable {
@@ -268,19 +292,6 @@ func (a *App) Active() types.Viewable {
 
 func (a *App) Previous() types.Viewable {
 	return a.previous
-}
-
-func (a *App) Back(focused bool) {
-	a.active, a.previous = a.previous, a.active
-
-	if a.active == a.previous {
-		a.active = types.ViewRoot
-	}
-
-	if focused {
-		a.SetFocused(a.active)
-	}
-	_, _ = a.Update(types.ViewChangeMsg{View: a.active})
 }
 
 func (a *App) Init() tea.Cmd {

@@ -67,17 +67,20 @@ func (m *CommandBar) toggle() {
 	}
 }
 
-func (m *CommandBar) propagateEvent(msg tea.Msg) {
+func (m *CommandBar) propagateEvent(msg tea.Msg) tea.Cmd {
 	if _, ok := msg.(types.FilterMsg); ok {
-		return
+		return nil
 	}
 
 	val := m.input.Value()
 
 	if m.previousValue != val {
-		m.app.Update(types.FilterMsg{Filter: val})
 		m.previousValue = val
+
+		return types.MsgAsCmd(types.FilterMsg{Filter: val})
 	}
+
+	return nil
 }
 
 func (m *CommandBar) Init() tea.Cmd {
@@ -86,6 +89,8 @@ func (m *CommandBar) Init() tea.Cmd {
 
 func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.style.Width(msg.Width - 2)
@@ -99,17 +104,14 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch msg.Type {
 		case tea.MouseRight:
-			m.app.SetFocused(m.is)
 			m.toggle() // TODO: toggle is still super buggy.
-			return m, nil
+			return m, types.MsgAsCmd(types.FocusChangeMsg{View: m.is})
 		case tea.MouseLeft:
-			m.app.SetFocused(m.is)
-
 			x, _ := z.Pos(msg)
 			x -= 6
 
 			m.input.SetCursor(x)
-			return m, nil
+			return m, types.MsgAsCmd(types.FocusChangeMsg{View: m.is})
 		}
 	case Msg:
 		switch msg {
@@ -122,8 +124,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.input.Blur()
 		}
 
-		m.propagateEvent(msg)
-		return m, nil
+		return m, m.propagateEvent(msg)
 	case types.FocusChangeMsg:
 		if m.is != msg.View {
 			m.input.Blur()
@@ -152,16 +153,18 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_ = m.input.Reset()
 			m.method = MsgNone
 			m.input.Blur()
-			m.app.SetFocused(m.app.Active())
-			m.propagateEvent(msg)
-			return m, nil
+			return m, tea.Batch(
+				m.propagateEvent(msg),
+				types.MsgAsCmd(types.FocusChangeMsg{View: m.app.Active()}),
+			)
 		case key.Matches(msg, types.KeyCmdBackspace) && m.input.Value() == "":
 			_ = m.input.Reset()
 			m.method = MsgNone
 			m.input.Blur()
-			m.app.SetFocused(m.app.Active())
-			m.propagateEvent(msg)
-			return m, nil
+			return m, tea.Batch(
+				m.propagateEvent(msg),
+				types.MsgAsCmd(types.FocusChangeMsg{View: m.app.Active()}),
+			)
 		case key.Matches(msg, types.KeyEnter):
 			if m.method == MsgCmdInvoke {
 				// TODO: switch to command view.
@@ -169,7 +172,7 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// to select the necessary command.
 				m.method = MsgNone
 				_ = m.input.Reset()
-				m.app.SetFocused(m.app.Active())
+				cmds = append(cmds, types.MsgAsCmd(types.FocusChangeMsg{View: m.app.Active()}))
 			}
 
 			m.input.Blur()
@@ -177,8 +180,8 @@ func (m *CommandBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.input, cmd = m.input.Update(msg)
-	m.propagateEvent(msg)
-	return m, cmd
+	cmds = append(cmds, cmd, m.propagateEvent(msg))
+	return m, tea.Batch(cmds...)
 }
 
 func (m *CommandBar) View() string {

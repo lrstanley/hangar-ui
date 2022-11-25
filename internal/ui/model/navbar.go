@@ -65,8 +65,10 @@ func (m *NavBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.MouseLeft:
 			for _, v := range m.views {
 				if zone.Get(string(v)).InBounds(msg) {
-					m.app.SetActive(v, true)
-					return m, nil
+					return m, tea.Batch(
+						types.MsgAsCmd(types.ViewChangeMsg{View: v}),
+						types.MsgAsCmd(types.FocusChangeMsg{View: v}),
+					)
 				}
 			}
 		}

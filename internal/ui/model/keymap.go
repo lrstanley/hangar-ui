@@ -35,6 +35,9 @@ func NewKeyMap(app types.App) *KeyMap {
 				types.KeyCmdInvoke,
 				types.KeyEnter,
 			},
+			types.ViewTargets: {
+				types.KeyRefresh,
+			},
 		},
 	}
 }

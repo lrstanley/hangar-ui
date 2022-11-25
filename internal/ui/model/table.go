@@ -90,7 +90,7 @@ func (v *Table) Update(msg tea.Msg) (Table, tea.Cmd) {
 
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
-			v.app.SetFocused(v.is)
+			return *v, types.MsgAsCmd(types.FocusChangeMsg{View: v.is})
 		case tea.MouseWheelUp:
 			v.model = v.model.PageUp()
 		case tea.MouseWheelDown:
@@ -99,8 +99,7 @@ func (v *Table) Update(msg tea.Msg) (Table, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, types.KeyCancel):
-			v.app.Back(true)
-			return *v, nil
+			return *v, types.MsgAsCmd(types.AppBackMsg{Focused: true})
 		}
 	// TODO: https://github.com/Evertras/bubble-table/issues/116
 	case types.FilterMsg:

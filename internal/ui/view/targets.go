@@ -93,7 +93,7 @@ func (v *Targets) UpdateRows() {
 func (v *Targets) Init() tea.Cmd {
 	return tea.Batch(
 		v.model.Init(),
-		api.Manager.QueryTargetInfo(0),
+		api.Manager.QueryTargetInfo,
 	)
 }
 
@@ -108,13 +108,21 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			api.Manager.SetActive(v.model.SelectedRow().Data[colKeyTargetName].(string))
 			v.UpdateRows()
 			return v, nil
-		case key.Matches(msg, types.KeyReload):
-			return v, api.Manager.QueryTargetInfo(0)
+		case key.Matches(msg, types.KeyRefresh):
+			return v, api.Manager.QueryTargetInfo
+		}
+	case types.ViewChangeMsg:
+		if msg.View == v.is {
+			return v, api.Manager.QueryTargetInfo
 		}
 	case api.TargetInfoMsg:
 		v.targetInfoCache = msg
 		v.UpdateRows()
-		return v, api.Manager.QueryTargetInfo(10 * time.Second)
+
+		if v.Focused() {
+			return v, types.DelayCmd(10*time.Second, api.Manager.QueryTargetInfo)
+		}
+		return v, nil
 	}
 
 	var cmd tea.Cmd

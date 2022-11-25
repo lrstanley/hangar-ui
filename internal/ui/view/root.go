@@ -40,7 +40,7 @@ func (v *Root) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
-			v.app.SetFocused(v.is)
+			return v, types.MsgAsCmd(types.FocusChangeMsg{View: v.is})
 		}
 	}
 	return v, nil

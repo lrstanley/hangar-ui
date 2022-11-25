@@ -5,8 +5,6 @@
 package api
 
 import (
-	"time"
-
 	"github.com/apex/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/concourse/concourse/atc"
@@ -25,35 +23,33 @@ type TargetInfoMsg []TargetInfo
 
 // QueryTargetInfo queries all known targets for their status, and returns
 // api.TargetInfoMsg.
-func (m *apiManager) QueryTargetInfo(delay time.Duration) func() tea.Msg {
-	return func() tea.Msg {
-		time.Sleep(delay)
-		msg := make(TargetInfoMsg, 0)
+func (c *apiManager) QueryTargetInfo() tea.Msg {
+	defer c.Loading("fetching targets")()
 
-		targets := m.Targets()
+	msg := make(TargetInfoMsg, 0)
+	targets := c.Targets()
 
-		for name := range targets {
-			t, err := rc.LoadTarget(name, false)
-			if err != nil {
-				continue
-			}
-
-			info, err := t.Client().GetInfo()
-
-			m.logger.WithFields(log.Fields{
-				"target": name,
-				"error":  err,
-				"info":   info,
-			}).Debug("queried target info")
-
-			msg = append(msg, TargetInfo{
-				TargetName: string(name),
-				Target:     t,
-				Info:       info,
-				Error:      err,
-			})
+	for name := range targets {
+		t, err := rc.LoadTarget(name, false)
+		if err != nil {
+			continue
 		}
 
-		return msg
+		info, err := t.Client().GetInfo()
+
+		c.logger.WithFields(log.Fields{
+			"target": name,
+			"error":  err,
+			"info":   info,
+		}).Debug("queried target info")
+
+		msg = append(msg, TargetInfo{
+			TargetName: string(name),
+			Target:     t,
+			Info:       info,
+			Error:      err,
+		})
 	}
+
+	return msg
 }

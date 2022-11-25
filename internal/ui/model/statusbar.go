@@ -6,6 +6,7 @@ package model
 
 import (
 	"github.com/apex/log"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/knipferrc/teacup/icons"
@@ -31,6 +32,9 @@ type StatusBar struct {
 	URL    string
 	Logo   string
 
+	loadingText string
+	spinner     spinner.Model
+
 	baseStyle   lipgloss.Style
 	targetStyle lipgloss.Style
 	urlStyle    lipgloss.Style
@@ -52,6 +56,8 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 		Target: api.Manager.ActiveName(),
 		URL:    api.Manager.Active().URL(),
 		Logo:   "hangar-ui",
+
+		spinner: spinner.New(),
 	}
 
 	m.baseStyle = lipgloss.NewStyle().
@@ -77,11 +83,15 @@ func NewStatusBar(app types.App, keys *KeyMap) *StatusBar {
 		Foreground(types.Theme.StatusBarTargetBg).
 		Render(helpSeparator)
 
+	m.spinner.Spinner = spinner.Dot
+	m.spinner.Style = m.baseStyle.Copy().
+		Foreground(types.Theme.StatusBarKeyDescFg)
+
 	return m
 }
 
 func (m *StatusBar) Init() tea.Cmd {
-	return nil
+	return m.spinner.Tick
 }
 
 func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -92,8 +102,17 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.MouseLeft:
 			if zone.Get("statusbar_target").InBounds(msg) {
-				m.app.SetActive(types.ViewTargets, true)
-				return m, nil
+				return m, tea.Batch(
+					m.spinner.Tick,
+					types.MsgAsCmd(types.ViewChangeMsg{View: types.ViewTargets}),
+					types.MsgAsCmd(types.FocusChangeMsg{View: types.ViewTargets}),
+				)
+			} else if zone.Get("statusbar_help").InBounds(msg) {
+				return m, tea.Batch(
+					m.spinner.Tick,
+					types.MsgAsCmd(types.ViewChangeMsg{View: types.ViewHelp}),
+					types.MsgAsCmd(types.FocusChangeMsg{View: types.ViewHelp}),
+				)
 			}
 		}
 	case types.FlyEvent:
@@ -101,19 +120,34 @@ func (m *StatusBar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Target = api.Manager.ActiveName()
 			m.URL = api.Manager.Active().URL()
 		}
+	case types.LoadingMsg:
+		m.loadingText = msg.Text
+		return m, m.spinner.Tick
+	case types.CancelLoadingMsg:
+		m.loadingText = ""
+		return m, nil
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
 	}
 
-	return m, nil
+	return m, m.spinner.Tick
 }
 
 func (m *StatusBar) View() string {
 	target := m.targetStyle.Render(m.Target)
 	url := m.urlStyle.Render(m.URL)
 	logo := m.logoStyle.Render(m.Logo)
+	loading := ""
+
+	if m.loadingText != "" {
+		loading = m.descStyle.Render(" ") + m.spinner.View() + m.descStyle.Render(m.loadingText)
+	}
 
 	help := ""
 	bindings := m.keys.ShortHelp()
-	helpWidth := m.Width - x.WMulti(target, url, logo) - 2
+	helpWidth := m.Width - x.WMulti(target, url, logo, loading) - 2
 
 	var totalWidth, w int
 	var str, tail string
@@ -150,5 +184,12 @@ func (m *StatusBar) View() string {
 
 	help = m.baseStyle.Copy().Width(helpWidth+2).Align(lipgloss.Right).Padding(0, 1).Render(help)
 
-	return x.X(0, zone.Mark("statusbar_target", target), help, url, logo)
+	return x.X(
+		0,
+		zone.Mark("statusbar_target", target),
+		loading,
+		zone.Mark("statusbar_help", help),
+		url,
+		logo,
+	)
 }

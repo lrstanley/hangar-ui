@@ -158,3 +158,11 @@ func (c *apiManager) Watcher() {
 		}
 	}
 }
+
+func (c *apiManager) Loading(text string) (cancel func()) {
+	c.signaler <- types.LoadingMsg{Text: text}
+
+	return func() {
+		c.signaler <- types.CancelLoadingMsg{}
+	}
+}

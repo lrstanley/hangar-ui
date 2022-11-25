@@ -11,10 +11,7 @@ import (
 type App interface {
 	tea.Model
 
-	SetFocused(v Viewable)
 	IsFocused(v Viewable) bool
-	SetActive(v Viewable, focused bool)
 	Active() Viewable
 	Previous() Viewable
-	Back(focused bool)
 }

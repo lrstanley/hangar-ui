@@ -105,13 +105,12 @@ func (v *Help) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch msg.Type {
 		case tea.MouseLeft, tea.MouseRight:
-			v.app.SetFocused(v.is)
+			return v, types.MsgAsCmd(types.FocusChangeMsg{View: v.is})
 		}
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, types.KeyCancel):
-			v.app.Back(true)
-			return v, nil
+			return v, types.MsgAsCmd(types.AppBackMsg{Focused: true})
 		}
 	case types.ViewChangeMsg:
 		v.generateHelp()

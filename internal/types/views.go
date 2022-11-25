@@ -19,15 +19,22 @@ const (
 	SubViewSomeItem Viewable = "someitem"
 )
 
+// ViewChangeMsg is sent when the primary view is changed (not necessarily focused).
 type ViewChangeMsg struct {
 	View Viewable
 }
 
+// FocusChangeMsg is sent when the focused view changes.
 type FocusChangeMsg struct {
 	View Viewable
 }
 
+// ViewMsg is a message that is sent to a specific view (if available).
 type ViewMsg struct {
 	View Viewable
 	Msg  tea.Msg
+}
+
+type AppBackMsg struct {
+	Focused bool
 }
