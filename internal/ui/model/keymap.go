@@ -37,11 +37,13 @@ func NewKeyMap(app types.App) *KeyMap {
 			},
 			types.ViewPipelines: {
 				types.KeyRefresh,
+				types.KeyShowArchived,
 				types.KeySortName,
 				types.KeySortTime,
 			},
 			types.ViewTargets: {
 				types.KeyRefresh,
+				types.KeyLogin,
 			},
 		},
 	}

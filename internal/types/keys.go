@@ -43,6 +43,20 @@ var (
 		key.WithKeys("ctrl+r"),
 		key.WithHelp("ctrl+r", "refresh"),
 	)
+	KeyLogin = key.NewBinding(
+		key.WithKeys("l"),
+		key.WithHelp("l", "login"),
+	)
+
+	// Keys for sorting.
+	KeySortName = key.NewBinding(
+		key.WithKeys("ctrl+n"),
+		key.WithHelp("ctrl+n", "sort by name"),
+	)
+	KeySortTime = key.NewBinding(
+		key.WithKeys("ctrl+t"),
+		key.WithHelp("ctrl+t", "sort by time"),
+	)
 
 	// Command bar keys.
 	KeyCmdFilter = key.NewBinding(
@@ -58,13 +72,9 @@ var (
 		key.WithHelp("backspace", "same as cancel if no input"),
 	)
 
-	// Keys for sorting.
-	KeySortName = key.NewBinding(
-		key.WithKeys("ctrl+n"),
-		key.WithHelp("ctrl+n", "sort by name"),
-	)
-	KeySortTime = key.NewBinding(
-		key.WithKeys("ctrl+t"),
-		key.WithHelp("ctrl+t", "sort by time"),
+	// Pipelines view keys.
+	KeyShowArchived = key.NewBinding(
+		key.WithKeys("a"),
+		key.WithHelp("a", "toggle archived"),
 	)
 )

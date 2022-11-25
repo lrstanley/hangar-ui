@@ -34,6 +34,7 @@ type Pipelines struct {
 	*Base
 	model model.Table
 
+	showArchived  bool
 	pipelineCache api.PipelineListMsg
 }
 
@@ -64,6 +65,10 @@ func (v *Pipelines) UpdateRows() {
 	var row table.RowData
 
 	for _, data := range v.pipelineCache.Pipelines {
+		if !v.showArchived && data.Archived {
+			continue
+		}
+
 		row = table.RowData{
 			colPipelineID:             table.NewStyledCell(data.ID, lipgloss.NewStyle().Align(lipgloss.Right)),
 			colPipelineName:           data.Name,
@@ -107,6 +112,10 @@ func (v *Pipelines) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return v, nil
 		case key.Matches(msg, types.KeySortTime):
 			v.model.Sort(colPipelineLastUpdatedRaw)
+			return v, nil
+		case key.Matches(msg, types.KeyShowArchived):
+			v.showArchived = !v.showArchived
+			v.UpdateRows()
 			return v, nil
 		}
 	case types.ViewChangeMsg:
