@@ -102,10 +102,10 @@ func (v *Pipelines) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return v, nil
 		case key.Matches(msg, types.KeyRefresh):
 			return v, api.Manager.QueryPipelines
-		case msg.String() == "ctrl+n":
+		case key.Matches(msg, types.KeySortName):
 			v.model.Sort(colPipelineName)
 			return v, nil
-		case msg.String() == "ctrl+t":
+		case key.Matches(msg, types.KeySortTime):
 			v.model.Sort(colPipelineLastUpdatedRaw)
 			return v, nil
 		}

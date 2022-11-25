@@ -35,6 +35,11 @@ func NewKeyMap(app types.App) *KeyMap {
 				types.KeyCmdInvoke,
 				types.KeyEnter,
 			},
+			types.ViewPipelines: {
+				types.KeyRefresh,
+				types.KeySortName,
+				types.KeySortTime,
+			},
 			types.ViewTargets: {
 				types.KeyRefresh,
 			},
@@ -45,9 +50,9 @@ func NewKeyMap(app types.App) *KeyMap {
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
 // of the key.Map interface.
 func (k *KeyMap) ShortHelp() (kb []key.Binding) {
-	if active := k.app.Active(); active != types.ViewRoot {
-		kb = append(kb, k.Binds[k.app.Active()]...)
-	}
+	// if active := k.app.Active(); active != types.ViewRoot {
+	// 	kb = append(kb, k.Binds[k.app.Active()]...)
+	// }
 	kb = append(kb, k.Binds[types.ViewRoot]...)
 	return kb
 }

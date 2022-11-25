@@ -44,7 +44,7 @@ var (
 		key.WithHelp("ctrl+r", "refresh"),
 	)
 
-	// Specifically for the command bar.
+	// Command bar keys.
 	KeyCmdFilter = key.NewBinding(
 		key.WithKeys("/", "ctrl+f"),
 		key.WithHelp("/", "filter results"),
@@ -56,5 +56,15 @@ var (
 	KeyCmdBackspace = key.NewBinding(
 		key.WithKeys("backspace"),
 		key.WithHelp("backspace", "same as cancel if no input"),
+	)
+
+	// Keys for sorting.
+	KeySortName = key.NewBinding(
+		key.WithKeys("ctrl+n"),
+		key.WithHelp("ctrl+n", "sort by name"),
+	)
+	KeySortTime = key.NewBinding(
+		key.WithKeys("ctrl+t"),
+		key.WithHelp("ctrl+t", "sort by time"),
 	)
 )
