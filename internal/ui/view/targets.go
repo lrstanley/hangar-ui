@@ -5,6 +5,7 @@
 package view
 
 import (
+	"os/exec"
 	"time"
 
 	"github.com/apex/log"
@@ -110,6 +111,12 @@ func (v *Targets) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return v, nil
 		case key.Matches(msg, types.KeyRefresh):
 			return v, api.Manager.QueryTargetInfo
+		case key.Matches(msg, types.KeyLogin):
+			// TODO: split this out (and support windows).
+			c := exec.Command("fly", "--target", api.Manager.ActiveName(), "login")
+			return v, tea.ExecProcess(c, func(err error) tea.Msg {
+				return nil
+			})
 		}
 	case types.ViewChangeMsg:
 		if msg.View == v.is {
