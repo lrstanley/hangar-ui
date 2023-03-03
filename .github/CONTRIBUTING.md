@@ -104,6 +104,6 @@ Below are a few guidelines if you would like to contribute:
 [discussions]: https://github.com/lrstanley/hangar-ui/discussions
 [issues]: https://github.com/lrstanley/hangar-ui/issues/new/choose
 [license]: https://github.com/lrstanley/hangar-ui/blob/master/LICENSE
-[pull-requests]: https://github.com/lrstanley/hangar-ui/issues/new/choose
+[pull-requests]: https://github.com/lrstanley/hangar-ui/pulls?q=is%3Aopen+is%3Apr
 [security]: https://github.com/lrstanley/hangar-ui/security/policy
 [support]: https://github.com/lrstanley/hangar-ui/blob/master/.github/SUPPORT.md
