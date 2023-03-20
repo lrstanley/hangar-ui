@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbles v0.14.0
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.6.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/knipferrc/teacup v0.2.0
 	github.com/lrstanley/bubblezone v0.0.0-20221029233222-b3469cc5a659
 	github.com/lrstanley/clix v0.0.0-20220704215932-712836d7df85
@@ -19,7 +20,7 @@ require (
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f // indirect
 	github.com/concourse/concourse v1.6.1-0.20220407194753-e6ad875114f6
 	github.com/containerd/console v1.0.3 // indirect
-	github.com/evertras/bubble-table v0.14.6
+	github.com/evertras/bubble-table v0.15.1
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/google/jsonapi v1.0.0 // indirect
 	github.com/gookit/color v1.5.1 // indirect
@@ -62,7 +63,6 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
 	github.com/cppforlife/go-semi-semantic v0.0.0-20160921010311-576b6af77ae4 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
