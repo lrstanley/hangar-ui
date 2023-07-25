@@ -52,9 +52,9 @@
 ## :link: Table of Contents
 
   - [Why](#grey_question-why)
-  - [Solution](#heavy_check_mark-solution)
-  - [Installation](#computer-installation)
-    - [Source](#toolbox-source)
+  - [✔️ Solution](#heavy_check_mark-solution)
+  - [💻 Installation](#computer-installation)
+    - [🧰 Source](#toolbox-source)
   - [Usage](#gear-usage)
   - [TODO](#ballot_box_with_check-todo)
   - [Support &amp; Assistance](#raising_hand_man-support--assistance)
