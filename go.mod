@@ -5,12 +5,13 @@ go 1.19
 require (
 	github.com/apex/log v1.9.0
 	github.com/charmbracelet/bubbles v0.14.0
-	github.com/charmbracelet/bubbletea v0.23.1
+	github.com/charmbracelet/bubbletea v0.23.2
 	github.com/charmbracelet/lipgloss v0.6.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/knipferrc/teacup v0.2.0
 	github.com/lrstanley/bubblezone v0.0.0-20221029233222-b3469cc5a659
 	github.com/lrstanley/clix v0.0.0-20220704215932-712836d7df85
-	github.com/muesli/termenv v0.13.0
+	github.com/muesli/termenv v0.14.0
 )
 
 require (
@@ -29,7 +30,7 @@ require (
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/muesli/ansi v0.0.0-20221106050444-61f0cd9a192a // indirect
@@ -62,12 +63,12 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
 	github.com/cppforlife/go-semi-semantic v0.0.0-20160921010311-576b6af77ae4 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.5.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 )
